@@ -42,7 +42,7 @@ router.get('/', async (req, res) => {
 					lectures: { $size: '$lectures' },
 					tutorials: { $size: '$tutorials' },
 					labs: { $size: '$labs' },
-					IC: 1,
+					comprehensiveExamDate: 1,
 				},
 			},
 		];

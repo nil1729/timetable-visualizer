@@ -38,12 +38,17 @@
 
 		<v-main>
 			<router-view />
+			<app-notification-alert />
 		</v-main>
 	</v-app>
 </template>
 
 <script>
+import Alerts from '@/components/layouts/Alerts.vue';
 export default {
+	components: {
+		'app-notification-alert': Alerts,
+	},
 	data() {
 		return {
 			drawer: true,

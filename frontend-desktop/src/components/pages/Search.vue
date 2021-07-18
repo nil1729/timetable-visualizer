@@ -12,7 +12,6 @@
 								:prepend-inner-icon="searchIcon"
 								:clear-icon="clearIcon"
 								:messages="hintText"
-								@click:clear="clearTypedText"
 								@focus="showHint"
 								@blur="hideHint"
 								solo
@@ -68,8 +67,8 @@
 					<v-col v-for="course in searchResults" :key="course._id" cols="4"
 						><v-card class="mx-auto" max-width="400">
 							<v-card-text class="mb-0 pb-0">
-								<div class="text-subtitle-2 mb-1">
-									<v-icon left color="black" small>
+								<div class="text-subtitle-2 mb-1 primary--text">
+									<v-icon left color="primary" small>
 										mdi-bookmark-multiple
 									</v-icon>
 									<span>{{ course.courseCode }}</span>
@@ -79,14 +78,11 @@
 								</div>
 							</v-card-text>
 
-							<v-card-text class="pt-2 pb-1 text-body-1 black--text">
+							<v-card-text class="pt-1 pb-2 d-flex justify-space-between text-body-2 black--text">
 								<div>
 									<span>Units:{{ ' ' }}</span>
 									<span>{{ course.units }}</span>
 								</div>
-							</v-card-text>
-
-							<v-card-text class="pt-0 pb-2 d-flex justify-space-between text-body-1 black--text">
 								<div>
 									<span>Tutorials:{{ ' ' }}</span>
 									<span>{{ course.tutorials }}</span>
@@ -101,18 +97,21 @@
 								</div>
 							</v-card-text>
 
-							<v-card-text class="pt-0 pb-1 text-body-1 black--text font-weight-medium">
-								<div>
-									<span>IC:{{ '  ' }}</span>
-									<span>{{ course.IC }}</span>
-								</div>
-							</v-card-text>
-
 							<v-card-actions>
 								<v-row align="center" justify="end" class="px-2 pb-2">
-									<v-btn class="ma-2" outlined color="primary" small>
-										<v-icon left>mdi-plus</v-icon>
-										Add Course
+									<v-btn
+										class="ma-2 "
+										:class="{ 'disabled-btn': course.added }"
+										:color="course.added ? 'success' : 'primary'"
+										small
+										depressed
+										@click="addCourse(course._id)"
+										:tile="course.added"
+										:outlined="!course.added"
+									>
+										<v-icon left v-if="course.added">mdi-marker-check</v-icon>
+										<v-icon left v-else>mdi-plus</v-icon>
+										{{ course.added ? 'course added' : 'add course' }}
 									</v-btn>
 								</v-row>
 							</v-card-actions>
@@ -125,7 +124,7 @@
 </template>
 
 <script>
-// import _ from 'lodash';
+import _ from 'lodash';
 export default {
 	name: 'search-courses',
 	data: () => ({
@@ -148,9 +147,6 @@ export default {
 		},
 	}),
 	methods: {
-		clearTypedText() {
-			this.typedText = '';
-		},
 		showHint() {
 			this.hintText = 'Search by Course Name (eg. Digital Design) or Course Code (eg. EEE F221)';
 		},
@@ -165,16 +161,25 @@ export default {
 					method: 'GET',
 					url: `courses?search=${searchText}&page=${page}`,
 				});
-				this.searching = false;
-				this.searchResults = courses.data;
+				this.searchResults = await this.$store.dispatch('filterSearchResults', courses.data);
 				this.pagination = courses.metadata;
+				this.searching = false;
 			} catch (err) {
 				console.error(err);
 			}
 		},
 
 		async paginationClicked(currentPage) {
-			await this.fetchCourses(this.typedText, currentPage);
+			await this.fetchCourses(this.typedText || '', currentPage);
+		},
+
+		async addCourse(courseID) {
+			const newCourse = this.searchResults.find((course) => course._id === courseID);
+			const courseAdded = await this.$store.dispatch('addCourseToUserStore', newCourse);
+			if (courseAdded)
+				this.searchResults = this.searchResults.map((course) =>
+					course._id == courseID ? { ...newCourse, added: true } : course
+				);
 		},
 	},
 
@@ -184,13 +189,19 @@ export default {
 
 	watch: {
 		typedText: function(newVal, oldVal) {
-			if (newVal.trim().length >= 3) {
+			if (_.isNull(newVal)) {
+				this.fetchCourses();
+			} else if (newVal.trim().length >= 3) {
 				this.fetchCourses(newVal);
-			} else if (newVal.trim().length < oldVal.trim().length) {
+			} else if (oldVal && newVal.trim().length < oldVal.trim().length) {
 				this.fetchCourses();
 			}
 		},
 	},
 };
 </script>
-<style></style>
+<style scoped>
+.disabled-btn {
+	pointer-events: none !important;
+}
+</style>
