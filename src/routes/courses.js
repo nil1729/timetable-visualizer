@@ -42,6 +42,7 @@ router.get('/', async (req, res) => {
 					lectures: { $size: '$lectures' },
 					tutorials: { $size: '$tutorials' },
 					labs: { $size: '$labs' },
+					IC: 1,
 				},
 			},
 		];
@@ -56,24 +57,43 @@ router.get('/', async (req, res) => {
 				? requestedLimit
 				: DEFAULT_LIMIT;
 
-		queryArr.push({
-			$facet: {
-				metadata: [
-					{ $count: 'totalCourses' },
-					{
-						$addFields: {
-							page: requestedPage,
-							limit: requestedLimit,
-							totalPages: { $ceil: { $divide: ['$totalCourses', requestedLimit] } },
+		queryArr.push(
+			{
+				$facet: {
+					metadata: [
+						{ $count: 'totalCourses' },
+						{
+							$addFields: {
+								page: requestedPage,
+								limit: requestedLimit,
+								totalPages: { $ceil: { $divide: ['$totalCourses', requestedLimit] } },
+							},
+						},
+					],
+					data: [{ $skip: (requestedPage - 1) * requestedLimit }, { $limit: requestedLimit }], // add projection here wish you re-shape the docs
+				},
+			},
+			{
+				$project: {
+					metadata: {
+						$cond: {
+							if: { $gt: [{ $size: '$metadata' }, Number(0)] },
+							then: { $first: '$metadata' },
+							else: {
+								totalCourses: 0,
+								page: requestedPage,
+								limit: requestedLimit,
+								totalPages: 0,
+							},
 						},
 					},
-				],
-				data: [{ $skip: (requestedPage - 1) * requestedLimit }, { $limit: requestedLimit }], // add projection here wish you re-shape the docs
-			},
-		});
+					data: 1,
+				},
+			}
+		);
 
 		let output = await Course.aggregate(queryArr);
-		return res.status(200).json(output);
+		return res.status(200).json(output[0]);
 	} catch (error) {
 		console.log(error);
 	}
