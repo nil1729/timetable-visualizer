@@ -95,6 +95,26 @@ export default new Vuex.Store({
 				console.log(e);
 			}
 		},
+
+		async getUserCourses() {
+			try {
+				return await localDB.readData('USER_COURSES');
+			} catch (e) {
+				console.log(e);
+			}
+		},
+
+		async removeCourseFromUserStore(context, course) {
+			try {
+				await localDB.removeItemFromStore('USER_COURSES', course._id);
+				context.commit('ADD_NOTIFICATION', {
+					message: `${course.courseName} (${course.courseCode}) REMOVED`,
+					type: 'info',
+				});
+			} catch (e) {
+				console.log(e);
+			}
+		},
 	},
 	modules: {},
 });

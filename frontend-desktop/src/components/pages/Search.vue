@@ -27,7 +27,7 @@
 			<v-container>
 				<v-row justify="center">
 					<v-col v-for="n in 6" :key="n" cols="4">
-						<v-skeleton-loader v-bind="attrs" type="article, actions"></v-skeleton-loader>
+						<v-skeleton-loader v-bind="skeletonAttrs" type="article, actions"></v-skeleton-loader>
 					</v-col>
 				</v-row>
 			</v-container>
@@ -134,7 +134,7 @@ export default {
 		hintText: '',
 		searching: false,
 		searchResults: null,
-		attrs: {
+		skeletonAttrs: {
 			class: 'mb-1',
 			boilerplate: false,
 			elevation: 2,

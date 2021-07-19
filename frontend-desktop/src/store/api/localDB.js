@@ -11,7 +11,7 @@ export default {
 				DB_STORES.forEach((store) => {
 					if (!db.objectStoreNames.contains(store)) {
 						db.createObjectStore(store, {
-							keyPath: 'id',
+							keyPath: '_id',
 							autoIncrement: true,
 						});
 					}
@@ -19,6 +19,7 @@ export default {
 			},
 		});
 	},
+
 	async writeData(storeName, data) {
 		const db = await this.getDB();
 		const tx = db.transaction(storeName, 'readwrite');
@@ -26,9 +27,18 @@ export default {
 		store.put(data);
 		return tx.done;
 	},
+
 	async readData(storeName) {
 		const db = await this.getDB();
 		const store = db.transaction(storeName, 'readonly').objectStore(storeName);
 		return store.getAll();
+	},
+
+	async removeItemFromStore(storeName, key) {
+		const db = await this.getDB();
+		const tx = db.transaction(storeName, 'readwrite');
+		const store = tx.objectStore(storeName);
+		store.delete(key);
+		return tx.done;
 	},
 };

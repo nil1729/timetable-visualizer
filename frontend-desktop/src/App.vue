@@ -62,7 +62,8 @@ export default {
 	},
 	methods: {
 		navigatePage(page) {
-			this.$router.push(`/${page}`);
+			let newPath = `/${page}`;
+			if (this.$route.path !== newPath) this.$router.push(newPath);
 		},
 	},
 };

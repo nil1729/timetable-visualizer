@@ -72,6 +72,7 @@ export default {
 				error: 'mdi-alert-circle-outline',
 				warning: 'mdi-alert',
 				success: 'mdi-check-circle-outline',
+				info: 'mdi-information',
 			},
 			len: 0, // we need it to have a css transition
 			snackbars: [], // array of {key, message, top, right, left, bottom, color, transition, timeout, show}
