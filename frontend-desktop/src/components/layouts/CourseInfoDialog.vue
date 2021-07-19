@@ -1,6 +1,6 @@
 <template>
 	<div class="text-center">
-		<v-dialog v-model="dialog" width="370" height="90%">
+		<v-dialog v-model="dialog" width="370" height="90%" content-class="my-course-info-dialog">
 			<v-card v-if="currentCourse" height="90vh">
 				<v-card-title class="text-body-1">
 					<v-icon left color="primary" small>
@@ -73,11 +73,23 @@
 										:key="section.section"
 										class="mb-2"
 									>
-										<v-expansion-panel-header class="font-weight-medium">{{
-											`${section.section} - ${section.instructors[0]} - [${parsedClassWeekDays(
-												section.timings
-											)}]`
-										}}</v-expansion-panel-header>
+										<v-expansion-panel-header class="font-weight-medium">
+											<div class="d-flex justify-start align-center">
+												<span>
+													<v-checkbox
+														v-model="checkboxes[item][section.section]"
+														class="my-edit-timetable-checkbox"
+													></v-checkbox>
+												</span>
+												<span>
+													{{
+														`${section.section} - ${
+															section.instructors[0]
+														} - [${parsedClassWeekDays(section.timings)}]`
+													}}
+												</span>
+											</div>
+										</v-expansion-panel-header>
 										<v-expansion-panel-content class="pt-2">
 											<div>
 												<p class="text-body-2 mb-1 black--text font-weight-medium">
@@ -124,6 +136,7 @@ export default {
 				boilerplate: false,
 				elevation: 2,
 			},
+			checkboxes: null,
 			dialog: false,
 			currentCourse: null,
 			tab: null,
@@ -136,6 +149,7 @@ export default {
 		showInfo(course) {
 			this.dialog = true;
 			this.currentCourse = course;
+			this.tab = 0;
 			this.fetchTimings();
 		},
 
@@ -151,7 +165,22 @@ export default {
 				url: `courses/${this.currentCourse._id}`,
 			});
 			this.timings = { lectures, labs, tutorials };
+			this.setupCheckboxes();
 			this.timingsLoading = false;
+		},
+
+		setupCheckboxes() {
+			let checkboxes = {};
+			let timings = this.timings;
+
+			this.tabItems.forEach((tab) => {
+				checkboxes[tab] = {};
+				timings[tab].forEach((timeSlot) => {
+					checkboxes[tab][timeSlot.section] = false;
+				});
+			});
+
+			this.checkboxes = checkboxes;
 		},
 	},
 	computed: {
@@ -169,10 +198,10 @@ export default {
 	},
 };
 </script>
-<style scoped>
-.v-dialog__content {
-	align-items: flex-start;
-	justify-content: flex-start;
+<style>
+.my-course-info-dialog {
+	position: absolute;
+	left: 0;
 }
 #timings-container {
 	max-height: 50vh;
@@ -180,5 +209,17 @@ export default {
 }
 #timings-container::-webkit-scrollbar {
 	width: 0;
+}
+.my-edit-timetable-checkbox {
+	margin: 0 !important;
+	padding: 0 !important;
+	flex: 0 !important;
+}
+.my-edit-timetable-checkbox .v-input__control .v-input__slot {
+	margin: 0 !important;
+}
+
+.my-edit-timetable-checkbox .v-input__control .v-messages {
+	display: none !important;
 }
 </style>
