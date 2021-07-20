@@ -1,7 +1,7 @@
 import { openDB } from 'idb';
 const DB_NAME = 'TIMETABLE_BITS_PILANI';
 const DB_VERSION = 1;
-const DB_STORES = ['USER_COURSES'];
+const DB_STORES = ['USER_COURSES', 'SCHEDULED_COURSES'];
 // let DB;
 
 export default {
@@ -26,6 +26,16 @@ export default {
 		const store = tx.objectStore(storeName);
 		store.put(data);
 		return tx.done;
+	},
+
+	async writeBulkData(storeName, dataArray) {
+		const db = await this.getDB();
+		const tx = db.transaction(storeName, 'readwrite');
+		const store = tx.objectStore(storeName);
+		let promises = [];
+		dataArray.forEach((data) => promises.push(store.put(data)));
+		promises.push(tx.done);
+		return await Promise.all(promises);
 	},
 
 	async readData(storeName) {

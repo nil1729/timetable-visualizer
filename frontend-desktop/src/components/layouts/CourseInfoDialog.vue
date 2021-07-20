@@ -77,6 +77,7 @@
 											<div class="d-flex justify-start align-center">
 												<span>
 													<v-checkbox
+														@change="checkboxClicked(item, section.section)"
 														v-model="checkboxes[item][section.section]"
 														class="my-edit-timetable-checkbox"
 													></v-checkbox>
@@ -128,6 +129,9 @@
 </template>
 <script>
 import moment from 'moment';
+import { mapGetters } from 'vuex';
+import _ from 'lodash';
+
 export default {
 	name: 'course-info-dialog',
 	data() {
@@ -172,18 +176,47 @@ export default {
 		setupCheckboxes() {
 			let checkboxes = {};
 			let timings = this.timings;
+			const courseScheduled = this.getCurrentCourseScheduledSections(this.currentCourse._id);
 
 			this.tabItems.forEach((tab) => {
 				checkboxes[tab] = {};
 				timings[tab].forEach((timeSlot) => {
-					checkboxes[tab][timeSlot.section] = false;
+					let keyword = tab + 'Section';
+
+					if (
+						courseScheduled &&
+						_.has(courseScheduled, keyword) &&
+						_.get(courseScheduled, keyword).section === timeSlot.section
+					) {
+						checkboxes[tab][timeSlot.section] = true;
+					} else {
+						checkboxes[tab][timeSlot.section] = false;
+					}
 				});
 			});
 
 			this.checkboxes = checkboxes;
 		},
+
+		checkboxClicked(sectionType, sectionID) {
+			const clickedSection = this.timings[sectionType].find((sc) => sc.section === sectionID);
+
+			if (this.checkboxes[sectionType][sectionID])
+				this.$store.dispatch('addSectionToSchedule', {
+					sectionType,
+					section: clickedSection,
+					course: this.currentCourse,
+				});
+			else
+				this.$store.dispatch('removeSectionFromSchedule', {
+					sectionType,
+					section: clickedSection,
+					course: this.currentCourse,
+				});
+		},
 	},
 	computed: {
+		...mapGetters(['getCurrentCourseScheduledSections']),
 		formattedExamDate: () => (date) => {
 			let formattedDate = moment(date).format('Do MMM[,] hh:mm A');
 			if (formattedDate === 'Invalid date') return 'TBA';

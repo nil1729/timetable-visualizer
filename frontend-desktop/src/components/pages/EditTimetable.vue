@@ -112,19 +112,28 @@
 						<v-col>
 							<v-sheet>
 								<v-calendar
+									class="my-edit-calender"
 									ref="calendar"
 									v-model="focus"
 									color="primary"
 									:events="events"
 									:event-color="getEventColor"
 									:type="type"
-									:first-interval="7"
+									:first-interval="8"
 									:interval-minutes="60"
 									:interval-count="12"
 									:weekday-format="formatDayString"
 									@click:event="showEvent"
 									@change="updateRange"
-								></v-calendar>
+								>
+									<template v-slot:event="{ event, timeSummary }">
+										<div class="pl-1 m-0 black--text">
+											<strong>{{ event.name }}</strong>
+											<br />
+											{{ timeSummary() }}
+										</div>
+									</template>
+								</v-calendar>
 								<v-menu
 									v-model="selectedOpen"
 									:close-on-content-click="false"
@@ -138,21 +147,10 @@
 											</v-btn>
 											<v-toolbar-title v-html="selectedEvent.name"></v-toolbar-title>
 											<v-spacer></v-spacer>
-											<v-btn icon>
-												<v-icon>mdi-heart</v-icon>
-											</v-btn>
-											<v-btn icon>
-												<v-icon>mdi-dots-vertical</v-icon>
-											</v-btn>
 										</v-toolbar>
 										<v-card-text>
 											<span v-html="selectedEvent.details"></span>
 										</v-card-text>
-										<v-card-actions>
-											<v-btn text color="secondary" @click="selectedOpen = false">
-												Cancel
-											</v-btn>
-										</v-card-actions>
 									</v-card>
 								</v-menu>
 							</v-sheet>
@@ -162,17 +160,22 @@
 			</v-row>
 		</v-container>
 		<course-info-dialog ref="courseInformation" />
+		<confirmation-dialog ref="confirmationDialog" @confirmQuery="confirmationSubmit" />
 	</div>
 </template>
 
 <script>
 import CourseInfoDialog from '@/components/layouts/CourseInfoDialog.vue';
+import ConfirmationDialog from '@/components/layouts/ConfirmationDialog.vue';
 import _ from 'lodash';
+import moment from 'moment';
+import { mapGetters } from 'vuex';
 
 export default {
 	name: 'edit-timetable',
 	components: {
 		'course-info-dialog': CourseInfoDialog,
+		'confirmation-dialog': ConfirmationDialog,
 	},
 	data: () => ({
 		skeletonAttrs: {
@@ -186,7 +189,7 @@ export default {
 			currentPageCourse: [],
 			page: 1,
 			totalPages: 0,
-			pageLimit: 3,
+			pageLimit: 4,
 			totalUserCourses: 0,
 		},
 		focus: '',
@@ -202,24 +205,58 @@ export default {
 		selectedOpen: false,
 		events: [],
 		weekdaysStrings: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
-		colors: ['blue', 'indigo', 'deep-purple', 'cyan', 'green', 'orange', 'grey darken-1'],
-		names: ['Meeting', 'Holiday', 'PTO', 'Travel', 'Event', 'Birthday', 'Conference', 'Party'],
+		colorsMapper: {
+			labs: 'purple accent-1',
+			lectures: 'green accent-2',
+			tutorials: 'orange accent-1',
+		},
+		typesMapper: {
+			labs: 'Practical',
+			lectures: 'Lecture',
+			tutorials: 'Tutorial',
+		},
+		daysMapper: {
+			0: 'Su',
+			1: 'M',
+			2: 'T',
+			3: 'W',
+			4: 'Th',
+			5: 'F',
+			6: 'S',
+		},
 	}),
+
+	computed: {
+		...mapGetters(['getScheduledCourses', 'getCurrentCourseScheduledSections']),
+	},
 
 	async mounted() {
 		this.$refs.calendar.checkChange();
 		await this.fetchUserCourses();
+		await this.$store.dispatch('initializateSchedule');
 
 		if (_.has(this.$route.query, 'course_id')) {
 			const courseID = _.get(this.$route.query, 'course_id');
 			const requestedCourse = this.userCourses.find((course) => course._id === courseID);
 			if (requestedCourse) this.$refs.courseInformation.showInfo(requestedCourse);
-			else
+			else {
+				this.$router.replace({
+					name: 'EditTimetable',
+					query: { ...this.$route.query, course_id: undefined },
+				});
 				this.$store.commit('ADD_NOTIFICATION', {
 					message: `NOT FOUND ANY COURSE WITH REQUESTED ID`,
 					type: 'error',
 				});
+			}
 		}
+	},
+
+	watch: {
+		getScheduledCourses: function(newVal) {
+			let daysArr = this.getDaysArray(this.startTimestamp.date, this.endTimestamp.date);
+			this.setCalenderSlots(daysArr, newVal);
+		},
 	},
 
 	methods: {
@@ -230,7 +267,7 @@ export default {
 			this.coursesFetching = false;
 		},
 
-		setUpPagination(page_number = 1, page_size = 3) {
+		setUpPagination(page_number = 1, page_size = 4) {
 			this.pagination = {
 				currentPageCourse: this.userCourses.slice(
 					(page_number - 1) * page_size,
@@ -249,18 +286,36 @@ export default {
 
 		async removeCourse(courseID) {
 			const deletedCourse = this.userCourses.find((course) => course._id === courseID);
-			await this.$store.dispatch('removeCourseFromUserStore', deletedCourse);
+			const courseScheduled = this.getCurrentCourseScheduledSections(deletedCourse._id);
 
+			if (courseScheduled) {
+				this.$refs.confirmationDialog.showDialog(courseScheduled);
+			} else {
+				this.confirmRemove(deletedCourse);
+			}
+		},
+
+		async confirmationSubmit({ choosenOption, courseID }) {
+			if (choosenOption) {
+				const deletedCourse = this.userCourses.find((course) => course._id === courseID);
+				this.confirmRemove(deletedCourse);
+			}
+			this.$refs.confirmationDialog.hideDialog();
+		},
+
+		async confirmRemove(course) {
 			if (_.has(this.$route.query, 'course_id')) {
 				const requestedCourseID = _.get(this.$route.query, 'course_id');
-				if (requestedCourseID === courseID)
+				if (requestedCourseID === course._id)
 					this.$router.replace({
 						name: 'EditTimetable',
 						query: { ...this.$route.query, course_id: undefined },
 					});
 			}
 
-			this.userCourses = this.userCourses.filter((courses) => courses._id !== courseID);
+			await this.$store.dispatch('removeCourseFromUserStore', course);
+
+			this.userCourses = this.userCourses.filter((courses) => courses._id !== course._id);
 			this.setUpPagination();
 		},
 
@@ -279,6 +334,91 @@ export default {
 			this.$refs.courseInformation.showInfo(course);
 		},
 
+		updateRange({ start, end }) {
+			this.startTimestamp = start;
+			this.endTimestamp = end;
+			let daysArr = this.getDaysArray(start.date, end.date);
+			this.setCalenderSlots(daysArr);
+		},
+
+		getDaysArray(start, end) {
+			var arr = [];
+			for (let dt = new Date(start); dt <= new Date(end); dt.setDate(dt.getDate() + 1)) {
+				arr.push(new Date(dt));
+			}
+			return arr;
+		},
+
+		setCalenderSlots(daysArr) {
+			let events = [];
+			let courses = this.getScheduledCourses;
+
+			for (let j = 0; j < daysArr.length; j++) {
+				let curDt = daysArr[j];
+				for (let i = 0; i < courses.length; i++) {
+					let sb = courses[i];
+					let lec = _.has(sb, 'lecturesSection') && _.get(sb, 'lecturesSection'),
+						tut = _.has(sb, 'tutorialsSection') && _.get(sb, 'tutorialsSection'),
+						lab = _.has(sb, 'labsSection') && _.get(sb, 'labsSection');
+					if (lec) events.push(...this.setSlots(sb, curDt, 'lectures'));
+					if (tut) events.push(...this.setSlots(sb, curDt, 'tutorials'));
+					if (lab) events.push(...this.setSlots(sb, curDt, 'labs'));
+				}
+			}
+			this.events = events;
+		},
+
+		setSlots(course, date, type) {
+			let slots = [];
+			let currSlot = course[`${type}Section`];
+			let timings = currSlot.timings;
+			let curDtCode = this.daysMapper[date.getDay()];
+			let hasClass = timings.findIndex((it) => it.dayCode === curDtCode);
+			if (hasClass >= 0) {
+				let classHour = timings[hasClass].time;
+				let [s, e] = classHour.split(' - ');
+				let startEvent = `${date.toISOString().substr(0, 10)} ${s}`;
+				let endEvent = `${date.toISOString().substr(0, 10)} ${e}`;
+				let instructorsList = ``;
+				currSlot.instructors.forEach((it) => (instructorsList += `<li>${it}</li>`));
+				let evData = {
+					start: startEvent,
+					end: endEvent,
+					color: this.colorsMapper[type],
+					name: `${course.courseCode} - ${currSlot.section}`,
+					title: `${course.courseName}`,
+					details: `
+						<h4>${this.typesMapper[type]} Section - ${currSlot.section}</h4>
+						<h4>Instructor(s)</h4>
+						<ul>
+							${instructorsList}
+						</ul>
+						<h4>Comprehensive Exam: ${moment(course.comprehensiveExamDate).format('Do MMM,  h:mm A')}</h4>
+						<h4>Course IC: ${course.IC}</h4>
+					`,
+				};
+				slots.push(evData);
+			}
+			return slots;
+		},
+
+		showEvent({ nativeEvent, event }) {
+			const open = () => {
+				this.selectedEvent = event;
+				this.selectedElement = nativeEvent.target;
+				setTimeout(() => {
+					this.selectedOpen = true;
+				}, 10);
+			};
+			if (this.selectedOpen) {
+				this.selectedOpen = false;
+				setTimeout(open, 10);
+			} else {
+				open();
+			}
+			nativeEvent.stopPropagation();
+		},
+
 		formatDayString(e) {
 			return this.weekdaysStrings[e.weekday];
 		},
@@ -294,59 +434,10 @@ export default {
 		next() {
 			this.$refs.calendar.next();
 		},
-		showEvent({ nativeEvent, event }) {
-			const open = () => {
-				this.selectedEvent = event;
-				this.selectedElement = nativeEvent.target;
-				requestAnimationFrame(() => requestAnimationFrame(() => (this.selectedOpen = true)));
-			};
-
-			if (this.selectedOpen) {
-				this.selectedOpen = false;
-				requestAnimationFrame(() => requestAnimationFrame(() => open()));
-			} else {
-				open();
-			}
-
-			nativeEvent.stopPropagation();
-		},
-		updateRange() {
-			const events = [];
-
-			// const min = new Date(`${start.date}T00:00:00`);
-			// const max = new Date(`${end.date}T23:59:59`);
-			// const days = (max.getTime() - min.getTime()) / 86400000;
-			// const eventCount = this.rnd(days, days + 20);
-
-			// for (let i = 0; i < eventCount; i++) {
-			// 	const allDay = this.rnd(0, 3) === 0;
-			// 	const firstTimestamp = this.rnd(min.getTime(), max.getTime());
-			// 	const first = new Date(firstTimestamp - (firstTimestamp % 900000));
-			// 	const secondTimestamp = this.rnd(2, allDay ? 288 : 8) * 900000;
-			// 	const second = new Date(first.getTime() + secondTimestamp);
-
-			// 	events.push({
-			// 		name: this.names[this.rnd(0, this.names.length - 1)],
-			// 		start: first,
-			// 		end: second,
-			// 		color: this.colors[this.rnd(0, this.colors.length - 1)],
-			// 		timed: !allDay,
-			// 	});
-			// }
-
-			this.events = events;
-		},
-		rnd(a, b) {
-			return Math.floor((b - a + 1) * Math.random()) + a;
-		},
 	},
 };
 </script>
 <style scoped>
-/* .v-btn--fab.v-size--default {
-	height: 35px !important;
-	width: 35px !important;
-} */
 .my-remove-icon {
 	position: absolute;
 	right: 3%;

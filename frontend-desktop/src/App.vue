@@ -39,15 +39,19 @@
 		<v-main>
 			<router-view />
 			<app-notification-alert />
+			<save-change-btn />
 		</v-main>
 	</v-app>
 </template>
 
 <script>
 import Alerts from '@/components/layouts/Alerts.vue';
+import SaveChangeBtn from '@/components/layouts/SaveChangeBtn.vue';
 export default {
+	name: 'bits-timetable-visualizer-app',
 	components: {
 		'app-notification-alert': Alerts,
+		'save-change-btn': SaveChangeBtn,
 	},
 	data() {
 		return {
@@ -91,5 +95,10 @@ export default {
 }
 ::-webkit-scrollbar-button {
 	display: none;
+}
+
+/* Calender Styles */
+.v-calendar.my-edit-calender .v-event-timed-container {
+	margin-right: 0 !important;
 }
 </style>

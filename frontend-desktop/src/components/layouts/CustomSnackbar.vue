@@ -6,8 +6,8 @@
 			:transition="snackbar.transition"
 			:top="snackbar.top"
 			:bottom="true"
-			:left="true"
-			:right="snackbar.right"
+			:left="snackbar.left"
+			:right="true"
 			:color="snackbar.color"
 			:key="snackbar.key"
 			:ref="'v-snackbars-' + identifier"
@@ -164,9 +164,7 @@ export default {
 					right: right,
 					color: this.getProp('type', i) || 'primary',
 					timeout: null,
-					transition:
-						this.getProp('transition', i) ||
-						(right ? 'slide-x-reverse-transition' : 'slide-x-transition'),
+					transition: 'slide-x-reverse-transition',
 					show: false,
 				});
 				this.keys.push(key);

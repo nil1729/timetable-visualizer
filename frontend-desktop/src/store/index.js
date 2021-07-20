@@ -3,17 +3,54 @@ import Vuex from 'vuex';
 import createConfig from './helpers/api-auth';
 import localDB from './api/localDB';
 import moment from 'moment';
+import _ from 'lodash';
 
 Vue.use(Vuex);
 
 export default new Vuex.Store({
 	state: {
 		notifications: [],
+		timetableSchedule: null,
+		timetableSaveStatus: true,
+		scheduledCourses: [],
+		sectionTypes: ['lectures', 'tutorials', 'labs'],
+		weekdayMapping: {
+			M: 0,
+			T: 1,
+			W: 2,
+			Th: 3,
+			F: 4,
+			S: 5,
+		},
+		timeMapping: {
+			'08:00': 0,
+			'09:00': 1,
+			'10:00': 2,
+			'11:00': 3,
+			'12:00': 4,
+			'13:00': 5,
+			'14:00': 6,
+			'15:00': 7,
+			'16:00': 8,
+			'17:00': 9,
+			'18:00': 10,
+			'19:00': 11,
+			'20:00': 12,
+		},
 	},
 
 	getters: {
 		notifications(state) {
 			return state.notifications;
+		},
+		getSavingStatus(state) {
+			return state.timetableSaveStatus;
+		},
+		getScheduledCourses(state) {
+			return state.scheduledCourses;
+		},
+		getCurrentCourseScheduledSections: (state) => (id) => {
+			return state.scheduledCourses.find((sb) => sb._id === id);
 		},
 	},
 
@@ -21,9 +58,105 @@ export default new Vuex.Store({
 		ADD_NOTIFICATION(state, notification) {
 			state.notifications = [...state.notifications, notification];
 		},
+		SET_TIMETABLE_SCHEDULE(state, dataset) {
+			state.timetableSchedule = dataset;
+		},
+		ADD_TO_SCHEDULE(state, { indexes, course, section, sectionType }) {
+			indexes.forEach((slotIndex) => {
+				for (let i = 0; i < slotIndex[2]; i++) {
+					state.timetableSchedule[slotIndex[0]][slotIndex[1] + i] = {
+						...course,
+						[`${sectionType}Section`]: section,
+					};
+				}
+			});
+		},
+
+		REMOVE_FROM_SCHEDULE(state, indexes) {
+			indexes.forEach((slotIndex) => {
+				for (let i = 0; i < slotIndex[2]; i++) {
+					state.timetableSchedule[slotIndex[0]][slotIndex[1] + i] = null;
+				}
+			});
+		},
+
+		ADD_COURSE_FOR_TIMETABLE(state, { course, section, sectionType }) {
+			const existingCourseIndex = state.scheduledCourses.findIndex((c) => c._id === course._id);
+
+			if (existingCourseIndex !== -1) {
+				state.scheduledCourses = state.scheduledCourses.map((c) => {
+					if (course._id === c._id) {
+						return { ...c, [`${sectionType}Section`]: section };
+					} else {
+						return c;
+					}
+				});
+			} else {
+				state.scheduledCourses = [
+					...state.scheduledCourses,
+					{ ...course, [`${sectionType}Section`]: section },
+				];
+			}
+		},
+		REMOVE_COURSE_SECTION_FROM_SCHEDULE(state, { course, sectionType }) {
+			const existingCourseIndex = state.scheduledCourses.findIndex((c) => c._id === course._id);
+
+			if (existingCourseIndex !== -1) {
+				state.scheduledCourses = state.scheduledCourses.map((c) => {
+					if (course._id === c._id) {
+						return { ...c, [`${sectionType}Section`]: undefined };
+					} else {
+						return c;
+					}
+				});
+			}
+		},
+
+		CHANGE_SAVE_STATUS(state, current_status) {
+			state.timetableSaveStatus = current_status;
+		},
+		SET_SCHEDULED_COURSES(state, courses) {
+			state.scheduledCourses = courses;
+		},
+		REMOVE_ENTIRE_COURSE_FROM_SCHEDULE(state, course) {
+			state.scheduledCourses = state.scheduledCourses.filter((sb) => sb._id !== course._id);
+		},
 	},
 
 	actions: {
+		async initializateSchedule(context) {
+			const scheduledCourses = await localDB.readData('SCHEDULED_COURSES');
+
+			let weekdayArray = new Array(7);
+			for (let i = 0; i < 7; i++) {
+				weekdayArray[i] = new Array(12);
+			}
+
+			context.commit('SET_TIMETABLE_SCHEDULE', weekdayArray);
+			context.commit('SET_SCHEDULED_COURSES', scheduledCourses);
+
+			for (let i = 0; i < scheduledCourses.length; i++) {
+				const sectionTypes = context.state.sectionTypes;
+
+				for (let j = 0; j < sectionTypes.length; j++) {
+					let requiredKey = sectionTypes[j] + 'Section';
+					if (_.has(scheduledCourses[i], requiredKey)) {
+						let indexes = await context.dispatch(
+							'parseSectionTimings',
+							scheduledCourses[i][requiredKey].timings
+						);
+
+						context.commit('ADD_TO_SCHEDULE', {
+							indexes,
+							course: scheduledCourses[i],
+							section: scheduledCourses[i][requiredKey],
+							sectionType: sectionTypes[j],
+						});
+					}
+				}
+			}
+		},
+
 		async sendRequest(context, { url, method, requestBody }) {
 			try {
 				let res = await fetch(`/api/v1/${url}`, {
@@ -106,11 +239,99 @@ export default new Vuex.Store({
 
 		async removeCourseFromUserStore(context, course) {
 			try {
+				const courseScheduled = context.getters.getCurrentCourseScheduledSections(course._id);
+
+				if (courseScheduled) {
+					const sectionTypes = context.state.sectionTypes;
+
+					for (let j = 0; j < sectionTypes.length; j++) {
+						let requiredKey = sectionTypes[j] + 'Section';
+						if (_.has(courseScheduled, requiredKey)) {
+							let indexes = await context.dispatch(
+								'parseSectionTimings',
+								courseScheduled[requiredKey].timings
+							);
+							context.commit('REMOVE_FROM_SCHEDULE', indexes);
+						}
+					}
+				}
+
 				await localDB.removeItemFromStore('USER_COURSES', course._id);
+				await localDB.removeItemFromStore('SCHEDULED_COURSES', course._id);
+
+				context.commit('REMOVE_ENTIRE_COURSE_FROM_SCHEDULE', course);
 				context.commit('ADD_NOTIFICATION', {
 					message: `${course.courseName} (${course.courseCode}) REMOVED`,
 					type: 'info',
 				});
+			} catch (e) {
+				console.log(e);
+			}
+		},
+
+		async addSectionToSchedule(context, { sectionType, section, course }) {
+			const indexes = await context.dispatch('parseSectionTimings', section.timings);
+			const { clashFound, clashedCourse } = await context.dispatch('checkSlotClashes', indexes);
+
+			if (!clashFound) {
+				context.commit('ADD_TO_SCHEDULE', { indexes, course, section, sectionType });
+				context.commit('ADD_COURSE_FOR_TIMETABLE', { course, section, sectionType });
+				context.commit('CHANGE_SAVE_STATUS', false);
+			} else {
+				context.commit('ADD_NOTIFICATION', {
+					message: `FOUND A CLASH WITH ${clashedCourse.courseName} (${course.courseCode})`,
+					type: 'warning',
+				});
+			}
+		},
+
+		async removeSectionFromSchedule(context, { sectionType, section, course }) {
+			const indexes = await context.dispatch('parseSectionTimings', section.timings);
+			context.commit('REMOVE_FROM_SCHEDULE', indexes);
+			context.commit('REMOVE_COURSE_SECTION_FROM_SCHEDULE', { course, sectionType });
+		},
+
+		async parseSectionTimings(context, timings) {
+			// index -> [weekdayIndex, timeIndex, diff]
+			let newIndexes = [];
+			timings.forEach((timing) => {
+				const [startTime, endTime] = timing.time.split(' - ');
+				const weekdayIndex = context.state.weekdayMapping[timing.dayCode];
+				const startTimeIndex = context.state.timeMapping[startTime];
+				const timeDef = Number(endTime.split(':')[0]) - Number(startTime.split(':')[0]);
+
+				newIndexes.push([weekdayIndex, startTimeIndex, timeDef + 1]);
+			});
+			return newIndexes;
+		},
+
+		async checkSlotClashes(context, indexes) {
+			// index -> [weekdayIndex, timeIndex, diff]
+			let clashedCourse;
+
+			let clashFound = indexes.some((slotIndex) => {
+				for (let i = 0; i < slotIndex[2]; i++) {
+					let slotCourse = context.state.timetableSchedule[slotIndex[0]][slotIndex[1] + i];
+					if (slotCourse) {
+						clashedCourse = slotCourse;
+						return true;
+					}
+				}
+
+				return false;
+			});
+
+			return { clashFound, clashedCourse };
+		},
+
+		async saveTimetableSchedule(context) {
+			try {
+				const res = await localDB.writeBulkData(
+					'SCHEDULED_COURSES',
+					context.state.scheduledCourses
+				);
+				console.log(res);
+				context.commit('CHANGE_SAVE_STATUS', true);
 			} catch (e) {
 				console.log(e);
 			}
