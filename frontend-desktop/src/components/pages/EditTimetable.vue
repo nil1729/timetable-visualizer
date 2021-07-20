@@ -3,7 +3,7 @@
 		<v-container fluid class="px-8 mt-3 mb-8">
 			<v-row justify="center">
 				<v-col cols="3">
-					<div v-if="coursesFetching || !userCourses">
+					<div v-if="coursesFetching || !getUserCoursesWithTag">
 						<v-skeleton-loader
 							v-for="n in 2"
 							:key="n"
@@ -11,7 +11,11 @@
 							type="article, actions"
 						></v-skeleton-loader>
 					</div>
-					<div v-else-if="!coursesFetching && userCourses && userCourses.length === 0">
+					<div
+						v-else-if="
+							!coursesFetching && getUserCoursesWithTag && getUserCoursesWithTag.length === 0
+						"
+					>
 						<v-container>
 							<v-row justify="center">
 								<v-img contain src="@/assets/empty.png"></v-img>
@@ -88,18 +92,26 @@
 								<v-card-actions>
 									<v-row align="center" justify="center" class="px-2 pb-2">
 										<v-btn
-											class="ma-2 "
-											:class="{ 'disabled-btn': course.added }"
-											:color="course.added ? 'success' : 'primary'"
+											v-if="course.scheduled"
+											class="ma-2 disabled-btn"
+											color="success"
+											small
+											depressed
+											tile
+										>
+											<v-icon left small>mdi-clipboard-check</v-icon>
+											scheduled
+										</v-btn>
+										<v-btn
+											class="ma-2"
+											color="primary"
 											small
 											depressed
 											@click="showCourseInfo(course)"
-											:tile="course.added"
-											:outlined="!course.added"
+											outlined
 										>
-											<v-icon left v-if="course.added">mdi-marker-check</v-icon>
-											<v-icon left v-else>mdi-calendar-plus</v-icon>
-											{{ course.added ? 'course added' : 'schedule class' }}
+											<v-icon left>mdi-calendar-plus</v-icon>
+											{{ course.scheduled ? 'edit' : 'schedule class' }}
 										</v-btn>
 									</v-row>
 								</v-card-actions>
@@ -226,17 +238,24 @@ export default {
 	}),
 
 	computed: {
-		...mapGetters(['getScheduledCourses', 'getCurrentCourseScheduledSections']),
+		...mapGetters([
+			'getScheduledCourses',
+			'getCurrentCourseScheduledSections',
+			'getUserCoursesWithTag',
+		]),
 	},
 
 	async mounted() {
+		this.coursesFetching = true;
 		this.$refs.calendar.checkChange();
-		await this.fetchUserCourses();
 		await this.$store.dispatch('initializateSchedule');
+		await this.$store.dispatch('getUserCourses');
+		this.setUpPagination();
+		this.coursesFetching = false;
 
 		if (_.has(this.$route.query, 'course_id')) {
 			const courseID = _.get(this.$route.query, 'course_id');
-			const requestedCourse = this.userCourses.find((course) => course._id === courseID);
+			const requestedCourse = this.getUserCoursesWithTag.find((course) => course._id === courseID);
 			if (requestedCourse) this.$refs.courseInformation.showInfo(requestedCourse);
 			else {
 				this.$router.replace({
@@ -255,27 +274,28 @@ export default {
 		getScheduledCourses: function(newVal) {
 			let daysArr = this.getDaysArray(this.startTimestamp.date, this.endTimestamp.date);
 			this.setCalenderSlots(daysArr, newVal);
+			this.setUpPagination('last_page');
 		},
 	},
 
 	methods: {
-		async fetchUserCourses() {
-			this.coursesFetching = true;
-			this.userCourses = await this.$store.dispatch('getUserCourses');
-			this.setUpPagination();
-			this.coursesFetching = false;
-		},
-
 		setUpPagination(page_number = 1, page_size = 4) {
+			// this.setCompleteScheduledCoursesTags();
+			let requestedPage = page_number;
+
+			if (page_number === 'last_page') {
+				requestedPage = this.pagination.page;
+			}
+
 			this.pagination = {
-				currentPageCourse: this.userCourses.slice(
-					(page_number - 1) * page_size,
-					page_number * page_size
+				currentPageCourse: this.getUserCoursesWithTag.slice(
+					(requestedPage - 1) * page_size,
+					requestedPage * page_size
 				),
-				page: page_number,
-				totalPages: Math.ceil(this.userCourses.length / page_size),
+				page: requestedPage,
+				totalPages: Math.ceil(this.getUserCoursesWithTag.length / page_size),
 				pageLimit: page_size,
-				totalUserCourses: this.userCourses.length,
+				totalUserCourses: this.getUserCoursesWithTag.length,
 			};
 		},
 
@@ -284,7 +304,7 @@ export default {
 		},
 
 		async removeCourse(courseID) {
-			const deletedCourse = this.userCourses.find((course) => course._id === courseID);
+			const deletedCourse = this.getUserCoursesWithTag.find((course) => course._id === courseID);
 			const courseScheduled = this.getCurrentCourseScheduledSections(deletedCourse._id);
 
 			if (courseScheduled) {
@@ -296,7 +316,7 @@ export default {
 
 		async confirmationSubmit({ choosenOption, courseID }) {
 			if (choosenOption) {
-				const deletedCourse = this.userCourses.find((course) => course._id === courseID);
+				const deletedCourse = this.getUserCoursesWithTag.find((course) => course._id === courseID);
 				this.confirmRemove(deletedCourse);
 			}
 			this.$refs.confirmationDialog.hideDialog();
@@ -313,8 +333,6 @@ export default {
 			}
 
 			await this.$store.dispatch('removeCourseFromUserStore', course);
-
-			this.userCourses = this.userCourses.filter((courses) => courses._id !== course._id);
 			this.setUpPagination();
 		},
 
@@ -436,7 +454,7 @@ export default {
 		},
 
 		editSchedule(courseID) {
-			const requestedCourse = this.userCourses.find((course) => course._id === courseID);
+			const requestedCourse = this.getUserCoursesWithTag.find((course) => course._id === courseID);
 			this.showCourseInfo(requestedCourse);
 		},
 	},
@@ -448,5 +466,8 @@ export default {
 	right: 3%;
 	top: 6%;
 	cursor: pointer;
+}
+.disabled-btn {
+	pointer-events: none !important;
 }
 </style>

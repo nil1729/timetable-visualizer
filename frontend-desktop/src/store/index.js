@@ -14,6 +14,7 @@ export default new Vuex.Store({
 		timetableSaveStatus: true,
 		scheduledCourses: [],
 		sectionTypes: ['lectures', 'tutorials', 'labs'],
+		userCourses: [],
 		sectionTypeMapping: {
 			L: 'lectures',
 			T: 'tutorials',
@@ -59,6 +60,29 @@ export default new Vuex.Store({
 		},
 		getSectionType: (state) => (sectionID) => {
 			return state.sectionTypeMapping[sectionID[0]];
+		},
+		getUserCoursesWithTag: (state) => {
+			const IDs = state.scheduledCourses.map((sb) => {
+				const sectionTypes = state.sectionTypes;
+				let fullfilled = sectionTypes.every((sectionType) => {
+					let keyword = sectionType + 'Section';
+					if (
+						(_.get(sb, sectionType) > 0 && _.has(sb, keyword) && _.get(sb, keyword)) ||
+						_.get(sb, sectionType) === 0
+					)
+						return true;
+					return false;
+				});
+				if (fullfilled) return sb._id;
+				else return undefined;
+			});
+			return state.userCourses.map((sb) => {
+				if (IDs.includes(sb._id)) {
+					return { ...sb, scheduled: true };
+				} else {
+					return { ...sb, scheduled: false };
+				}
+			});
 		},
 	},
 
@@ -129,6 +153,12 @@ export default new Vuex.Store({
 		REMOVE_ENTIRE_COURSE_FROM_SCHEDULE(state, course) {
 			state.scheduledCourses = state.scheduledCourses.filter((sb) => sb._id !== course._id);
 		},
+		SET_USER_COURSES(state, courses) {
+			state.userCourses = courses;
+		},
+		REMOVE_USER_COURSE(state, courseID) {
+			state.userCourses = state.userCourses.filter((sb) => sb._id !== courseID);
+		},
 	},
 
 	actions: {
@@ -148,7 +178,7 @@ export default new Vuex.Store({
 
 				for (let j = 0; j < sectionTypes.length; j++) {
 					let requiredKey = sectionTypes[j] + 'Section';
-					if (_.has(scheduledCourses[i], requiredKey)) {
+					if (_.has(scheduledCourses[i], requiredKey) && _.get(scheduledCourses[i], requiredKey)) {
 						let indexes = await context.dispatch(
 							'parseSectionTimings',
 							scheduledCourses[i][requiredKey].timings
@@ -237,9 +267,10 @@ export default new Vuex.Store({
 			}
 		},
 
-		async getUserCourses() {
+		async getUserCourses(context) {
 			try {
-				return await localDB.readData('USER_COURSES');
+				const courses = await localDB.readData('USER_COURSES');
+				context.commit('SET_USER_COURSES', courses);
 			} catch (e) {
 				console.log(e);
 			}
@@ -268,6 +299,7 @@ export default new Vuex.Store({
 				await localDB.removeItemFromStore('SCHEDULED_COURSES', course._id);
 
 				context.commit('REMOVE_ENTIRE_COURSE_FROM_SCHEDULE', course);
+				context.commit('REMOVE_USER_COURSE', course._id);
 				context.commit('ADD_NOTIFICATION', {
 					message: `${course.courseName} (${course.courseCode}) REMOVED`,
 					type: 'info',
