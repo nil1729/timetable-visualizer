@@ -19,16 +19,24 @@
 
 			<v-divider></v-divider>
 
-			<v-list dense>
-				<v-list-item @click="navigatePage(item.page)" v-for="item in items" :key="item.title" link>
-					<v-list-item-icon>
-						<v-icon>{{ item.icon }}</v-icon>
-					</v-list-item-icon>
+			<v-list nav dense>
+				<v-list-item-group v-model="selectedMenuTab" color="primary">
+					<v-list-item
+						@click="navigatePage(item.page)"
+						v-for="item in items"
+						:key="item.title"
+						link
+						colo
+					>
+						<v-list-item-icon>
+							<v-icon>{{ item.icon }}</v-icon>
+						</v-list-item-icon>
 
-					<v-list-item-content>
-						<v-list-item-title>{{ item.title }}</v-list-item-title>
-					</v-list-item-content>
-				</v-list-item>
+						<v-list-item-content>
+							<v-list-item-title>{{ item.title }}</v-list-item-title>
+						</v-list-item-content>
+					</v-list-item>
+				</v-list-item-group>
 			</v-list>
 		</v-navigation-drawer>
 
@@ -57,17 +65,23 @@ export default {
 		return {
 			drawer: true,
 			items: [
-				{ title: 'Timetable', icon: 'mdi-calendar-clock-outline', page: 'timetable' },
+				{ title: 'Timetable', icon: 'mdi-calendar-clock-outline', page: '' },
 				{ title: 'Edit Timetable', icon: 'mdi-calendar-edit', page: 'edit-timetable' },
 				{ title: 'Search Courses', icon: 'mdi-book-search-outline', page: 'search' },
 			],
 			mini: true,
+			selectedMenuTab: 0,
 		};
 	},
 	methods: {
 		navigatePage(page) {
 			let newPath = `/${page}`;
 			if (this.$route.path !== newPath) this.$router.push(newPath);
+		},
+	},
+	watch: {
+		$route: function(newVal) {
+			this.selectedMenuTab = this.items.findIndex((item) => `/${item.page}` === newVal.path);
 		},
 	},
 };
@@ -98,7 +112,21 @@ export default {
 }
 
 /* Calender Styles */
-.v-calendar.my-edit-calender .v-event-timed-container {
+.v-calendar.my-edit-calender .v-event-timed-container,
+.v-calendar.my-view-calender .v-event-timed-container {
 	margin-right: 0 !important;
+}
+.v-calendar.my-view-calender .v-btn--fab.v-size--default {
+	height: 40px !important;
+	width: 40px !important;
+	margin-top: 3px !important;
+}
+.v-calendar.my-view-calender .v-btn--fab.v-size--small {
+	height: 35px !important;
+	width: 35px !important;
+	margin: 2px 0 3px !important;
+}
+.v-calendar.my-view-calender .v-event.v-event-start.v-event-end {
+	width: 100% !important;
 }
 </style>
