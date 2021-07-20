@@ -14,6 +14,11 @@ export default new Vuex.Store({
 		timetableSaveStatus: true,
 		scheduledCourses: [],
 		sectionTypes: ['lectures', 'tutorials', 'labs'],
+		sectionTypeMapping: {
+			L: 'lectures',
+			T: 'tutorials',
+			P: 'labs',
+		},
 		weekdayMapping: {
 			M: 0,
 			T: 1,
@@ -51,6 +56,9 @@ export default new Vuex.Store({
 		},
 		getCurrentCourseScheduledSections: (state) => (id) => {
 			return state.scheduledCourses.find((sb) => sb._id === id);
+		},
+		getSectionType: (state) => (sectionID) => {
+			return state.sectionTypeMapping[sectionID[0]];
 		},
 	},
 
@@ -269,19 +277,30 @@ export default new Vuex.Store({
 			}
 		},
 
-		async addSectionToSchedule(context, { sectionType, section, course }) {
-			const indexes = await context.dispatch('parseSectionTimings', section.timings);
-			const { clashFound, clashedCourse } = await context.dispatch('checkSlotClashes', indexes);
-
-			if (!clashFound) {
-				context.commit('ADD_TO_SCHEDULE', { indexes, course, section, sectionType });
-				context.commit('ADD_COURSE_FOR_TIMETABLE', { course, section, sectionType });
-				context.commit('CHANGE_SAVE_STATUS', false);
-			} else {
-				context.commit('ADD_NOTIFICATION', {
-					message: `FOUND A CLASH WITH ${clashedCourse.courseName} (${course.courseCode})`,
-					type: 'warning',
+		async addSectionToSchedule(context, { sectionType, section, course, oldSection = null }) {
+			try {
+				const indexes = await context.dispatch('parseSectionTimings', section.timings);
+				const { clashFound, clashedCourse } = await context.dispatch('checkSlotClashes', {
+					indexes,
+					course,
+					sectionType,
+					oldSection,
 				});
+
+				if (!clashFound) {
+					context.commit('ADD_TO_SCHEDULE', { indexes, course, section, sectionType });
+					context.commit('ADD_COURSE_FOR_TIMETABLE', { course, section, sectionType });
+					context.commit('CHANGE_SAVE_STATUS', false);
+				} else {
+					context.commit('ADD_NOTIFICATION', {
+						message: `FOUND A CLASH WITH ${clashedCourse.courseName} (${course.courseCode})`,
+						type: 'warning',
+					});
+					return { success: false };
+				}
+				return { success: true };
+			} catch (error) {
+				console.log('Add To Schedule Function', error);
 			}
 		},
 
@@ -289,6 +308,7 @@ export default new Vuex.Store({
 			const indexes = await context.dispatch('parseSectionTimings', section.timings);
 			context.commit('REMOVE_FROM_SCHEDULE', indexes);
 			context.commit('REMOVE_COURSE_SECTION_FROM_SCHEDULE', { course, sectionType });
+			context.commit('CHANGE_SAVE_STATUS', false);
 		},
 
 		async parseSectionTimings(context, timings) {
@@ -305,23 +325,42 @@ export default new Vuex.Store({
 			return newIndexes;
 		},
 
-		async checkSlotClashes(context, indexes) {
-			// index -> [weekdayIndex, timeIndex, diff]
-			let clashedCourse;
+		async checkSlotClashes(
+			context,
+			{ indexes, oldSection = null, sectionType = null, course = null }
+		) {
+			try {
+				// index -> [weekdayIndex, timeIndex, diff]
+				let clashedCourse;
+				let clashFound = false;
 
-			let clashFound = indexes.some((slotIndex) => {
-				for (let i = 0; i < slotIndex[2]; i++) {
-					let slotCourse = context.state.timetableSchedule[slotIndex[0]][slotIndex[1] + i];
-					if (slotCourse) {
-						clashedCourse = slotCourse;
-						return true;
+				for (let i = 0; i < indexes.length; i++) {
+					for (let j = 0; j < indexes[i][2]; j++) {
+						let slotCourse = context.state.timetableSchedule[indexes[i][0]][indexes[i][1] + j];
+
+						if (slotCourse) {
+							if (course && slotCourse._id === course._id && oldSection) {
+								// Some Logic
+							} else {
+								clashedCourse = slotCourse;
+								clashFound = true;
+							}
+						}
 					}
 				}
 
-				return false;
-			});
+				if (!clashFound && oldSection) {
+					await context.dispatch('removeSectionFromSchedule', {
+						sectionType,
+						section: oldSection,
+						course,
+					});
+				}
 
-			return { clashFound, clashedCourse };
+				return { clashFound, clashedCourse };
+			} catch (error) {
+				console.log('Clash Function', error);
+			}
 		},
 
 		async saveTimetableSchedule(context) {

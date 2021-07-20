@@ -1,6 +1,6 @@
 <template>
 	<div class="text-center">
-		<v-dialog v-model="dialog" width="370" height="90%" content-class="my-course-info-dialog">
+		<v-dialog v-model="dialog" width="375" height="90%" content-class="my-course-info-dialog">
 			<v-card v-if="currentCourse" height="90vh">
 				<v-card-title class="text-body-1">
 					<v-icon left color="primary" small>
@@ -186,6 +186,7 @@ export default {
 					if (
 						courseScheduled &&
 						_.has(courseScheduled, keyword) &&
+						_.get(courseScheduled, keyword) &&
 						_.get(courseScheduled, keyword).section === timeSlot.section
 					) {
 						checkboxes[tab][timeSlot.section] = true;
@@ -198,21 +199,35 @@ export default {
 			this.checkboxes = checkboxes;
 		},
 
-		checkboxClicked(sectionType, sectionID) {
+		async checkboxClicked(sectionType, sectionID) {
 			const clickedSection = this.timings[sectionType].find((sc) => sc.section === sectionID);
 
-			if (this.checkboxes[sectionType][sectionID])
-				this.$store.dispatch('addSectionToSchedule', {
+			if (this.checkboxes[sectionType][sectionID]) {
+				const scheduledCourse = this.getCurrentCourseScheduledSections(this.currentCourse._id);
+				let oldSection;
+
+				if (scheduledCourse) {
+					const keyword = sectionType + 'Section';
+					oldSection = _.has(scheduledCourse, keyword) && _.get(scheduledCourse, keyword);
+				}
+
+				const { success } = await this.$store.dispatch('addSectionToSchedule', {
 					sectionType,
 					section: clickedSection,
 					course: this.currentCourse,
+					oldSection,
 				});
-			else
+
+				if (!success) {
+					this.checkboxes[sectionType][sectionID] = false;
+				} else this.setupCheckboxes();
+			} else {
 				this.$store.dispatch('removeSectionFromSchedule', {
 					sectionType,
 					section: clickedSection,
 					course: this.currentCourse,
 				});
+			}
 		},
 	},
 	computed: {

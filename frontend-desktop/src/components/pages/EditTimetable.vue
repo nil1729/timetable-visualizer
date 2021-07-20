@@ -140,13 +140,12 @@
 									:activator="selectedElement"
 									offset-x
 								>
-									<v-card color="grey lighten-4" min-width="350px" flat>
-										<v-toolbar :color="selectedEvent.color" dark>
-											<v-btn icon>
+									<v-card color="grey lighten-4" min-width="350px" dense flat>
+										<v-toolbar :color="selectedEvent.color" height="50px">
+											<v-btn icon @click="editSchedule(selectedEvent.courseID)">
 												<v-icon>mdi-pencil</v-icon>
 											</v-btn>
 											<v-toolbar-title v-html="selectedEvent.name"></v-toolbar-title>
-											<v-spacer></v-spacer>
 										</v-toolbar>
 										<v-card-text>
 											<span v-html="selectedEvent.details"></span>
@@ -387,6 +386,7 @@ export default {
 					color: this.colorsMapper[type],
 					name: `${course.courseCode} - ${currSlot.section}`,
 					title: `${course.courseName}`,
+					courseID: course._id,
 					details: `
 						<h4>${this.typesMapper[type]} Section - ${currSlot.section}</h4>
 						<h4>Instructor(s)</h4>
@@ -433,6 +433,11 @@ export default {
 		},
 		next() {
 			this.$refs.calendar.next();
+		},
+
+		editSchedule(courseID) {
+			const requestedCourse = this.userCourses.find((course) => course._id === courseID);
+			this.showCourseInfo(requestedCourse);
 		},
 	},
 };
