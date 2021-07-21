@@ -13,6 +13,14 @@
 
 ---
 
+### Updates:
+
+- **2021-07-21**
+  - Dark Theme Implemented
+  - Some UI issues fixed
+
+---
+
 ### Website Demo
 
 - Visit Here for more information: [https://bits-timetable.herokuapp.com](https://bits-timetable.herokuapp.com/)
