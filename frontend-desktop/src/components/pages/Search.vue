@@ -73,12 +73,12 @@
 									</v-icon>
 									<span>{{ course.courseCode }}</span>
 								</div>
-								<div class="text-subtitle-1 black--text font-weight-medium">
+								<div class="text-subtitle-1 font-weight-medium">
 									{{ course.courseName }}
 								</div>
 							</v-card-text>
 
-							<v-card-text class="pt-1 pb-2 d-flex justify-space-between text-body-2 black--text">
+							<v-card-text class="pt-1 pb-2 d-flex justify-space-between text-body-2">
 								<div>
 									<span>Units:{{ ' ' }}</span>
 									<span>{{ course.units }}</span>

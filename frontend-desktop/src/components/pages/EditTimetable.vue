@@ -65,12 +65,12 @@
 										</v-icon>
 										<span>{{ course.courseCode }}</span>
 									</div>
-									<div class="text-subtitle-2 black--text font-weight-medium">
+									<div class="text-subtitle-2 font-weight-medium">
 										{{ course.courseName }}
 									</div>
 								</v-card-text>
 
-								<v-card-text class="pt-1 pb-2 d-flex justify-space-between text-body-2 black--text">
+								<v-card-text class="pt-1 pb-2 d-flex justify-space-between text-body-2">
 									<div>
 										<span class="font-weight-medium">Units:{{ ' ' }}</span>
 										<span>{{ course.units > 0 ? course.units : 'NA' }}</span>
@@ -155,9 +155,11 @@
 									<v-card color="grey lighten-4" min-width="350px" dense flat>
 										<v-toolbar :color="selectedEvent.color" height="50px">
 											<v-btn icon @click="editSchedule(selectedEvent.courseID)">
-												<v-icon>mdi-pencil</v-icon>
+												<v-icon color='black'>mdi-pencil</v-icon>
 											</v-btn>
-											<v-toolbar-title v-html="selectedEvent.name"></v-toolbar-title>
+											<v-toolbar-title> 
+												<span class='black--text'>{{selectedEvent.name}}</span>
+											</v-toolbar-title>
 										</v-toolbar>
 										<v-card-text>
 											<span v-html="selectedEvent.details"></span>
@@ -406,6 +408,7 @@ export default {
 					title: `${course.courseName}`,
 					courseID: course._id,
 					details: `
+					<div class='black--text'>
 						<h4>${this.typesMapper[type]} Section - ${currSlot.section}</h4>
 						<h4>Instructor(s)</h4>
 						<ul>
@@ -413,6 +416,7 @@ export default {
 						</ul>
 						<h4>Comprehensive Exam: ${moment(course.comprehensiveExamDate).format('Do MMM,  h:mm A')}</h4>
 						<h4>Course IC: ${course.IC}</h4>
+					</div>
 					`,
 				};
 				slots.push(evData);

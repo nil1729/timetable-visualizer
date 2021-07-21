@@ -42,6 +42,12 @@
 
 		<v-app-bar app dense flat>
 			<v-toolbar-title>BITS Timetable Visualizer</v-toolbar-title>
+			<v-spacer></v-spacer>
+
+			<v-btn icon @click="changeTheme">
+				<v-icon v-if="$vuetify.theme.isDark">mdi-weather-night</v-icon>
+				<v-icon v-else>mdi-white-balance-sunny</v-icon>
+			</v-btn>
 		</v-app-bar>
 
 		<v-main>
@@ -77,6 +83,9 @@ export default {
 		navigatePage(page) {
 			let newPath = `/${page}`;
 			if (this.$route.path !== newPath) this.$router.push(newPath);
+		},
+		changeTheme() {
+			this.$vuetify.theme.dark = this.$vuetify.theme.isDark ? false : true;
 		},
 	},
 	watch: {
@@ -116,6 +125,7 @@ export default {
 .v-calendar.my-view-calender .v-event-timed-container {
 	margin-right: 0 !important;
 }
+.v-calendar.my-edit-calender .v-btn--fab.v-size--default,
 .v-calendar.my-view-calender .v-btn--fab.v-size--default {
 	height: 40px !important;
 	width: 40px !important;

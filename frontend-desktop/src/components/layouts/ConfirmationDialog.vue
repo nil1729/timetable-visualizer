@@ -1,27 +1,25 @@
 <template>
-	<v-row justify="center">
-		<v-dialog v-model="dialog" persistent max-width="800" width="fit-content">
-			<v-card v-if="currentCourse">
-				<v-card-title class="text-overline">
-					Are you sure to remove {{ currentCourse.courseName }} ({{ currentCourse.courseCode }})
-				</v-card-title>
-				<v-card-text>
-					<div class="text-body-1">
-						This course currently scheduled on your timetable
-					</div>
-				</v-card-text>
-				<v-card-actions>
-					<v-spacer></v-spacer>
-					<v-btn color="green darken-1" text @click="confirmQuery(false)">
-						No
-					</v-btn>
-					<v-btn color="green darken-1" text @click="confirmQuery(true)">
-						Yes
-					</v-btn>
-				</v-card-actions>
-			</v-card>
-		</v-dialog>
-	</v-row>
+	<v-dialog v-model="dialog" persistent max-width="800" width="fit-content">
+		<v-card v-if="currentCourse">
+			<v-card-title class="text-overline">
+				Are you sure to remove {{ currentCourse.courseName }} ({{ currentCourse.courseCode }})
+			</v-card-title>
+			<v-card-text>
+				<div class="text-body-1">
+					This course currently scheduled on your timetable
+				</div>
+			</v-card-text>
+			<v-card-actions>
+				<v-spacer></v-spacer>
+				<v-btn color="green darken-1" text @click="confirmQuery(false)">
+					No
+				</v-btn>
+				<v-btn color="green darken-1" text @click="confirmQuery(true)">
+					Yes
+				</v-btn>
+			</v-card-actions>
+		</v-card>
+	</v-dialog>
 </template>
 <script>
 export default {

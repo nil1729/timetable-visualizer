@@ -1,6 +1,6 @@
 <template>
 	<div>
-		<v-container fluid class="px-8 mb-8">
+		<v-container fluid class="px-8 pb-8">
 			<v-row justify="center">
 				<v-col cols="12">
 					<v-sheet v-if="timetableLoading" class="pa-8">
@@ -112,9 +112,11 @@
 									<v-card color="grey lighten-4" min-width="350px" dense flat>
 										<v-toolbar :color="selectedEvent.color" height="50px">
 											<v-btn icon @click="editSchedule(selectedEvent.courseID)">
-												<v-icon>mdi-pencil</v-icon>
+												<v-icon color="black">mdi-pencil</v-icon>
 											</v-btn>
-											<v-toolbar-title v-html="selectedEvent.name"></v-toolbar-title>
+											<v-toolbar-title>
+												<span class="black--text">{{ selectedEvent.name }}</span>
+											</v-toolbar-title>
 										</v-toolbar>
 										<v-card-text>
 											<span v-html="selectedEvent.details"></span>
@@ -275,13 +277,15 @@ export default {
 					title: `${course.courseName}`,
 					courseID: course._id,
 					details: `
-						<h4>${this.typesMapper[type]} Section - ${currSlot.section}</h4>
-						<h4>Instructor(s)</h4>
-						<ul>
-							${instructorsList}
-						</ul>
-						<h4>Comprehensive Exam: ${moment(course.comprehensiveExamDate).format('Do MMM,  h:mm A')}</h4>
-						<h4>Course IC: ${course.IC}</h4>
+						<div class='black--text'>
+							<h4>${this.typesMapper[type]} Section - ${currSlot.section}</h4>
+							<h4>Instructor(s)</h4>
+							<ul>
+								${instructorsList}
+							</ul>
+							<h4>Comprehensive Exam: ${moment(course.comprehensiveExamDate).format('Do MMM,  h:mm A')}</h4>
+							<h4>Course IC: ${course.IC}</h4>
+						</div>
 					`,
 				};
 				slots.push(evData);

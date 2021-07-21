@@ -10,22 +10,22 @@
 				</v-card-title>
 
 				<v-card-text class="pb-2">
-					<div class="text-subtitle-1 black--text font-weight-medium">
+					<div class="text-subtitle-1  font-weight-medium">
 						{{ currentCourse.courseName }}
 					</div>
 				</v-card-text>
 
 				<v-card-text class="text-body-1 pb-1">
 					<div>
-						<span class="black--text font-weight-medium">Course Units:{{ ' ' }}</span>
+						<span class=" font-weight-medium">Course Units:{{ ' ' }}</span>
 						<span>{{ currentCourse.units }}</span>
 					</div>
 					<div>
-						<span class="black--text font-weight-medium">Course IC:{{ ' ' }}</span>
+						<span class=" font-weight-medium">Course IC:{{ ' ' }}</span>
 						<span>{{ currentCourse.IC }}</span>
 					</div>
 					<div>
-						<span class="black--text font-weight-medium">Comprehensive Exam:{{ ' ' }}</span>
+						<span class=" font-weight-medium">Comprehensive Exam:{{ ' ' }}</span>
 						<span>{{ formattedExamDate(currentCourse.comprehensiveExamDate) }}</span>
 					</div>
 				</v-card-text>
@@ -93,7 +93,7 @@
 										</v-expansion-panel-header>
 										<v-expansion-panel-content class="pt-2">
 											<div>
-												<p class="text-body-2 mb-1 black--text font-weight-medium">
+												<p class="text-body-2 mb-1  font-weight-medium">
 													Timings:
 												</p>
 												<p
@@ -105,7 +105,7 @@
 												</p>
 											</div>
 											<div class="mt-3">
-												<p class="text-body-2 mb-1 black--text font-weight-medium">
+												<p class="text-body-2 mb-1  font-weight-medium">
 													Instructors:
 												</p>
 												<p
