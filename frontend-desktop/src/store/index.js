@@ -99,6 +99,9 @@ export default new Vuex.Store({
 					state.timetableSchedule[slotIndex[0]][slotIndex[1] + i] = {
 						...course,
 						[`${sectionType}Section`]: section,
+						indexSection: `${sectionType.substring(0, sectionType.length - 1)} - ${
+							section.section
+						}`.toUpperCase(),
 					};
 				}
 			});
@@ -325,7 +328,7 @@ export default new Vuex.Store({
 					context.commit('CHANGE_SAVE_STATUS', false);
 				} else {
 					context.commit('ADD_NOTIFICATION', {
-						message: `FOUND A CLASH WITH ${clashedCourse.courseName} (${course.courseCode})`,
+						message: `FOUND A CLASH WITH ${clashedCourse.courseName} (${clashedCourse.courseCode}) ${clashedCourse.indexSection}`,
 						type: 'warning',
 					});
 					return { success: false };

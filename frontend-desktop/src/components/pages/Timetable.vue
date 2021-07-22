@@ -114,8 +114,8 @@
 											<v-btn icon @click="editSchedule(selectedEvent.courseID)">
 												<v-icon color="black">mdi-pencil</v-icon>
 											</v-btn>
-											<v-toolbar-title>
-												<span class="black--text">{{ selectedEvent.name }}</span>
+											<v-toolbar-title class="pl-1">
+												<span class="black--text">{{ selectedEvent.title }}</span>
 											</v-toolbar-title>
 										</v-toolbar>
 										<v-card-text>

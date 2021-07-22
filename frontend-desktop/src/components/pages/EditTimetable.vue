@@ -155,11 +155,26 @@
 									<v-card color="grey lighten-4" min-width="350px" dense flat>
 										<v-toolbar :color="selectedEvent.color" height="50px">
 											<v-btn icon @click="editSchedule(selectedEvent.courseID)">
-												<v-icon color='black'>mdi-pencil</v-icon>
+												<v-icon color="black">mdi-pencil</v-icon>
 											</v-btn>
-											<v-toolbar-title> 
-												<span class='black--text'>{{selectedEvent.name}}</span>
+											<v-toolbar-title class="pl-1">
+												<span class="black--text">{{ selectedEvent.title }}</span>
 											</v-toolbar-title>
+											<v-spacer></v-spacer>
+											<v-tooltip bottom>
+												<template v-slot:activator="{ on, attrs }">
+													<v-btn
+														icon
+														color="error"
+														v-bind="attrs"
+														v-on="on"
+														@click="removeSection(selectedEvent)"
+													>
+														<v-icon color="black">mdi-delete</v-icon>
+													</v-btn>
+												</template>
+												<span>Remove Section</span>
+											</v-tooltip>
 										</v-toolbar>
 										<v-card-text>
 											<span v-html="selectedEvent.details"></span>
@@ -403,14 +418,17 @@ export default {
 				let evData = {
 					start: startEvent,
 					end: endEvent,
+					sectionDetail: currSlot,
+					sectionType: type,
 					color: this.colorsMapper[type],
 					name: `${course.courseCode} - ${currSlot.section}`,
 					title: `${course.courseName}`,
 					courseID: course._id,
 					details: `
 					<div class='black--text'>
+						<h4>Course Code:  ${course.courseCode}</h4>
 						<h4>${this.typesMapper[type]} Section - ${currSlot.section}</h4>
-						<h4>Instructor(s)</h4>
+						<h4>Section Instructor(s)</h4>
 						<ul>
 							${instructorsList}
 						</ul>
@@ -460,6 +478,18 @@ export default {
 		editSchedule(courseID) {
 			const requestedCourse = this.getUserCoursesWithTag.find((course) => course._id === courseID);
 			this.showCourseInfo(requestedCourse);
+		},
+
+		async removeSection(event) {
+			const requestedCourse = this.getUserCoursesWithTag.find(
+				(course) => course._id === event.courseID
+			);
+
+			await this.$store.dispatch('removeSectionFromSchedule', {
+				sectionType: event.sectionType,
+				section: event.sectionDetail,
+				course: requestedCourse,
+			});
 		},
 	},
 };

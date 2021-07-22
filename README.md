@@ -15,6 +15,9 @@
 
 ### Updates:
 
+- **2021-07-22**
+  - Notification Bug fixed
+  - Improve the calender event feature
 - **2021-07-21**
   - Dark Theme Implemented
   - Some UI issues fixed

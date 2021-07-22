@@ -20,7 +20,7 @@
 			<v-divider></v-divider>
 
 			<v-list nav dense>
-				<v-list-item-group v-model="selectedMenuTab" color="primary">
+				<v-list-item-group v-model="selectedMenuTab" color="primary" mandatory>
 					<v-list-item
 						@click="navigatePage(item.page)"
 						v-for="item in items"
@@ -82,6 +82,7 @@ export default {
 	methods: {
 		navigatePage(page) {
 			let newPath = `/${page}`;
+			this.selectedMenuTab = this.items.findIndex((pg) => pg.page === page);
 			if (this.$route.path !== newPath) this.$router.push(newPath);
 		},
 		changeTheme() {
@@ -92,6 +93,10 @@ export default {
 		$route: function(newVal) {
 			this.selectedMenuTab = this.items.findIndex((item) => `/${item.page}` === newVal.path);
 		},
+	},
+	created() {
+		const route = this.$route;
+		this.selectedMenuTab = this.items.findIndex((item) => `/${item.page}` === route.path);
 	},
 };
 </script>
