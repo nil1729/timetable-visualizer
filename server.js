@@ -9,6 +9,7 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 const connectDB = require('./config/db');
 const courseRoutes = require('./src/routes/courses');
+const timetableRoutes = require('./src/routes/timetable');
 
 // create middleware
 const middlewareDetect = (req, res, next) => {
@@ -24,6 +25,7 @@ const middlewareDetect = (req, res, next) => {
 
 app.use(express.json());
 app.use('/api/v1/courses', courseRoutes);
+app.use('/api/v1/timetable', timetableRoutes);
 
 if (process.env.NODE_ENV === 'production') {
 	app.use(express.static(__dirname + '/prod/desktop'));
