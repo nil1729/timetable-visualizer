@@ -1,0 +1,48 @@
+const mongoose = require('mongoose');
+
+const timetableSchema = new mongoose.Schema({
+	shareID: { type: String, unique: true, required: true },
+	scheduledCourses: [
+		{
+			course: { type: mongoose.Types.ObjectId, ref: 'Course' },
+			lecturesSection: {
+				section: { type: String },
+				dhString: { type: String },
+				timings: [
+					{
+						day: { type: String },
+						dayCode: { type: String },
+						time: { type: String },
+					},
+				],
+				instructors: { type: Array },
+			},
+			tutorialsSection: {
+				section: { type: String },
+				dhString: { type: String },
+				timings: [
+					{
+						day: { type: String },
+						dayCode: { type: String },
+						time: { type: String },
+					},
+				],
+				instructors: { type: Array },
+			},
+			labsSection: {
+				section: { type: String },
+				dhString: { type: String },
+				timings: [
+					{
+						day: { type: String },
+						dayCode: { type: String },
+						time: { type: String },
+					},
+				],
+				instructors: { type: Array },
+			},
+		},
+	],
+});
+
+module.exports = mongoose.model('Timetable', timetableSchema);
