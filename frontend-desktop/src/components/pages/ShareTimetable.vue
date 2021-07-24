@@ -336,7 +336,7 @@ export default {
 
 			const { scheduledCourses, error } = await this.$store.dispatch('sendRequest', {
 				method: 'GET',
-				url: `/timetable/import/${shareID}`,
+				url: `timetable/import/${shareID}`,
 			});
 
 			if (Array.isArray(scheduledCourses)) {
@@ -379,7 +379,7 @@ export default {
 
 				const { scheduledCourses, error } = await this.$store.dispatch('sendRequest', {
 					method: 'GET',
-					url: `/timetable/import/${shareID}`,
+					url: `timetable/import/${shareID}`,
 				});
 
 				if (Array.isArray(scheduledCourses)) {
