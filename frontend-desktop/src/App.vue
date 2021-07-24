@@ -26,7 +26,6 @@
 						v-for="item in items"
 						:key="item.title"
 						link
-						colo
 					>
 						<v-list-item-icon>
 							<v-icon>{{ item.icon }}</v-icon>
@@ -38,6 +37,22 @@
 					</v-list-item>
 				</v-list-item-group>
 			</v-list>
+
+			<template v-slot:append>
+				<v-list nav dense>
+					<v-list-item link @click="openFeedbackDialog">
+						<v-list-item-icon>
+							<v-icon color="info">mdi-comment-account-outline</v-icon>
+						</v-list-item-icon>
+
+						<v-list-item-content>
+							<v-list-item-title class="info--text">
+								Feedback
+							</v-list-item-title>
+						</v-list-item-content>
+					</v-list-item>
+				</v-list>
+			</template>
 		</v-navigation-drawer>
 
 		<v-app-bar app dense flat>
@@ -54,6 +69,7 @@
 			<router-view />
 			<app-notification-alert />
 			<save-change-btn />
+			<feedback-dialog ref="myFeedbackDialog" @feedbackSubmit="sendFeedbackToMe" />
 		</v-main>
 	</v-app>
 </template>
@@ -61,11 +77,15 @@
 <script>
 import Alerts from '@/components/layouts/Alerts.vue';
 import SaveChangeBtn from '@/components/layouts/SaveChangeBtn.vue';
+import FeedbackDialog from '@/components/layouts/FeedbackDialog.vue';
+import _ from 'lodash';
+
 export default {
 	name: 'bits-timetable-visualizer-app',
 	components: {
 		'app-notification-alert': Alerts,
 		'save-change-btn': SaveChangeBtn,
+		'feedback-dialog': FeedbackDialog,
 	},
 	data() {
 		return {
@@ -94,6 +114,35 @@ export default {
 				})
 			);
 			this.$vuetify.theme.dark = this.$vuetify.theme.isDark ? false : true;
+		},
+		openFeedbackDialog() {
+			this.$refs.myFeedbackDialog.showDialog();
+		},
+		async sendFeedbackToMe(data) {
+			const FEEDBACK_SUBMISSION_URL = 'https://formspree.io/f/mleawybk';
+			const formdata = new FormData();
+			formdata.append('Feedback Message ', data.text);
+			formdata.append('Ratings', `${data.rating}/5`);
+			const requestOptions = {
+				method: 'POST',
+				headers: {
+					Accept: 'application/json',
+				},
+				body: formdata,
+				redirect: 'follow',
+			};
+			try {
+				await fetch(FEEDBACK_SUBMISSION_URL, requestOptions);
+				this.$store.commit('ADD_NOTIFICATION', {
+					message: _.upperCase('thanks for your feedback'),
+					type: 'success',
+				});
+			} catch (e) {
+				this.$store.commit('ADD_NOTIFICATION', {
+					message: _.upperCase('unknown error occurred while processing your feedback'),
+					type: 'success',
+				});
+			}
 		},
 	},
 	watch: {
