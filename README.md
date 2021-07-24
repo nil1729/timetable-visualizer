@@ -15,6 +15,9 @@
 
 ### Updates:
 
+- **2021-07-24**
+  - Sharing Timetable Feature
+  - Feedback System
 - **2021-07-22**
   - Notification Bug fixed
   - Improve the calender event feature
