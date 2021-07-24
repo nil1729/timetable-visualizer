@@ -19,6 +19,12 @@ const routes = [
 		path: '/search',
 		meta: { title: 'Search Courses | Desktop' },
 	},
+	{
+		name: 'ShareTimetable',
+		component: () => import('@/components/pages/ShareTimetable.vue'),
+		path: '/share-timetable',
+		meta: { title: 'Share Timetable | Desktop' },
+	},
 ];
 
 export default routes;

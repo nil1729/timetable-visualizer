@@ -10,7 +10,7 @@
 					</v-btn>
 				</v-list-item-avatar>
 
-				<v-list-item-title>Anonymous User</v-list-item-title>
+				<v-list-item-title>BITS Student</v-list-item-title>
 
 				<v-btn icon @click.stop="mini = !mini">
 					<v-icon>mdi-chevron-left</v-icon>
@@ -74,6 +74,7 @@ export default {
 				{ title: 'Timetable', icon: 'mdi-calendar-clock-outline', page: '' },
 				{ title: 'Edit Timetable', icon: 'mdi-calendar-edit', page: 'edit-timetable' },
 				{ title: 'Search Courses', icon: 'mdi-book-search-outline', page: 'search' },
+				{ title: 'Share Timetable', icon: 'mdi-share-all-outline', page: 'share-timetable' },
 			],
 			mini: true,
 			selectedMenuTab: 0,
@@ -86,6 +87,12 @@ export default {
 			if (this.$route.path !== newPath) this.$router.push(newPath);
 		},
 		changeTheme() {
+			localStorage.setItem(
+				'THEME_MODE',
+				JSON.stringify({
+					theme: this.$vuetify.theme.isDark ? 'light' : 'dark',
+				})
+			);
 			this.$vuetify.theme.dark = this.$vuetify.theme.isDark ? false : true;
 		},
 	},

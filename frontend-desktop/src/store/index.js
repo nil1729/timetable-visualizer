@@ -198,11 +198,19 @@ export default new Vuex.Store({
 			}
 		},
 
+		async getMyScheduledCourses() {
+			try {
+				return await localDB.readData('SCHEDULED_COURSES');
+			} catch (error) {
+				console.log(error);
+			}
+		},
+
 		async sendRequest(context, { url, method, requestBody }) {
 			try {
 				let res = await fetch(`/api/v1/${url}`, {
 					method: method,
-					headers: createConfig(),
+					...createConfig(),
 					body: requestBody && JSON.stringify(requestBody),
 				});
 				return await res.json();

@@ -5,6 +5,6 @@ Vue.use(Vuetify);
 
 export default new Vuetify({
 	theme: {
-		dark: true,
+		dark: JSON.parse(localStorage.getItem('THEME_MODE') || '{}').theme === 'dark' ? true : false,
 	},
 });
