@@ -46,6 +46,8 @@
 						<v-col cols="4">
 							<div class="primary--text text-body-1">
 								Total {{ pagination.totalCourses }} Courses Found
+								<br>
+								<small class="warning--text">Last Updated at: August 4<sup>th</sup>, 2021</small>
 							</div>
 						</v-col>
 						<v-col cols="8">
