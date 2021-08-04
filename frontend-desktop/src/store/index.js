@@ -148,6 +148,13 @@ export default new Vuex.Store({
 		},
 
 		CHANGE_SAVE_STATUS(state, current_status) {
+			if (current_status === false) {
+				window.onbeforeunload = function() {
+					return 'Are you sure you want to leave?';
+				};
+			} else {
+				window.onbeforeunload = null;
+			}
 			state.timetableSaveStatus = current_status;
 		},
 		SET_SCHEDULED_COURSES(state, courses) {
