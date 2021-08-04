@@ -15,6 +15,9 @@
 
 ### Updates:
 
+- **2021-08-04**
+  - New Timetable (Acc. to August 4th)
+  - _New Section_ tag on each sections for New Admissions
 - **2021-07-24**
   - Sharing Timetable Feature
   - Feedback System
