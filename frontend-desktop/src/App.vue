@@ -150,7 +150,8 @@ export default {
 			this.selectedMenuTab = this.items.findIndex((item) => `/${item.page}` === newVal.path);
 		},
 	},
-	created() {
+	async created() {
+		await this.$store.dispatch('removeOldData');
 		const route = this.$route;
 		this.selectedMenuTab = this.items.findIndex((item) => `/${item.page}` === route.path);
 	},

@@ -1,8 +1,7 @@
 import { openDB } from 'idb';
-const DB_NAME = 'TIMETABLE_BITS_PILANI';
-const DB_VERSION = 1;
+const DB_VERSION = 2;
+const DB_NAME = 'TIMETABLE_BITS_PILANI_VERSION_' + DB_VERSION;
 const DB_STORES = ['USER_COURSES', 'SCHEDULED_COURSES'];
-// let DB;
 
 export default {
 	async getDB() {
@@ -50,5 +49,14 @@ export default {
 		const store = tx.objectStore(storeName);
 		store.delete(key);
 		return tx.done;
+	},
+
+	async deleteOldDbs() {
+		const dbs = await window.indexedDB.databases();
+		dbs.forEach((db) => {
+			if (db.name !== DB_NAME) {
+				window.indexedDB.deleteDatabase(db.name);
+			}
+		});
 	},
 };

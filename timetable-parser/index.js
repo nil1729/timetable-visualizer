@@ -1,6 +1,7 @@
+const VERSION = 1;
 const fs = require('fs');
 const path = require('path');
-const bufferFile = fs.readFileSync(path.join(__dirname, '..', 'data', 'data.json'));
+const bufferFile = fs.readFileSync(path.join(__dirname, '..', 'data', `v${VERSION}.json`));
 let JSONData = bufferFile.toString();
 const tt = JSON.parse(JSONData);
 let totalCourses = [];
@@ -144,7 +145,7 @@ for (let i = 0; i < totalCourses.length; i++) {
 				time = currSec['DAYS & HOURS'],
 				instructors = [];
 
-			lecArr.forEach((l) => instructors.push(l['INSTRUCTOR-IN-CHARGE /Instructor']));
+			lecArr.forEach((l) => instructors.push(l['INSTRUCTOR-IN-CHARGE / Instructor']));
 			profs.push(...instructors);
 
 			lectures.sections[j] = {
@@ -172,7 +173,7 @@ for (let i = 0; i < totalCourses.length; i++) {
 				time = currSec['DAYS & HOURS'],
 				instructors = [];
 
-			lecArr.forEach((l) => instructors.push(l['INSTRUCTOR-IN-CHARGE /Instructor']));
+			lecArr.forEach((l) => instructors.push(l['INSTRUCTOR-IN-CHARGE / Instructor']));
 			profs.push(...instructors);
 
 			tutorial.sections[j] = {
@@ -200,7 +201,7 @@ for (let i = 0; i < totalCourses.length; i++) {
 				time = currSec['DAYS & HOURS'],
 				instructors = [];
 
-			lecArr.forEach((l) => instructors.push(l['INSTRUCTOR-IN-CHARGE /Instructor']));
+			lecArr.forEach((l) => instructors.push(l['INSTRUCTOR-IN-CHARGE / Instructor']));
 			profs.push(...instructors);
 
 			practical.sections[j] = {
@@ -240,13 +241,14 @@ function parseCompreDate(str) {
 
 // Capitalize the profs name
 function capitalize(str) {
+	if (!str || str.trim().length === 0) return 'TBA';
 	return str
 		.split(' ')
 		.map((part) => {
 			if (part.toUpperCase() === '(RS)') return part;
-			let p = part.toLowerCase();
-			let f = p[0].toUpperCase();
-			let l = p.slice(1);
+			let p = part && part.toLowerCase();
+			let f = p[0] && p[0].toUpperCase();
+			let l = p && p.slice(1);
 			return `${f}${l}`;
 		})
 		.join(' ');
@@ -306,6 +308,13 @@ function parseLabTiming(str) {
 	return timings;
 }
 
+function newSectionParse(section) {
+	if (section && section.trim().length > 0) {
+		let isNew = section.lastIndexOf('N') === section.length - 1;
+		return { isNew, section: isNew ? section.substring(0, section.length - 1) : section };
+	} else return { isNew: false, section };
+}
+
 // Refactor the whole course array for better understanding
 for (let i = 0; i < totalCourses.length; i++) {
 	let course = totalCourses[i];
@@ -327,10 +336,11 @@ for (let i = 0; i < totalCourses.length; i++) {
 			let timings = parseLecTutTiming(lec.time);
 			let instructors = lec.instructors.map((i) => capitalize(i));
 			lectures.push({
-				section: lec.section,
+				section: newSectionParse(lec.section).section,
 				dhString: lec.time,
 				timings,
 				instructors,
+				newSection: newSectionParse(lec.section).isNew,
 			});
 		});
 	}
@@ -341,10 +351,11 @@ for (let i = 0; i < totalCourses.length; i++) {
 			let timings = parseLecTutTiming(tut.time);
 			let instructors = tut.instructors.map((i) => capitalize(i));
 			tutorials.push({
-				section: tut.section,
+				section: newSectionParse(tut.section).section,
 				dhString: tut.time,
 				timings,
 				instructors,
+				newSection: newSectionParse(tut.section).isNew,
 			});
 		});
 	}
@@ -356,10 +367,11 @@ for (let i = 0; i < totalCourses.length; i++) {
 			let timings = parseLabTiming(lab.time);
 			let instructors = lab.instructors.map((i) => capitalize(i));
 			labs.push({
-				section: lab.section,
+				section: newSectionParse(lab.section).section,
 				dhString: lab.time,
 				timings,
 				instructors,
+				newSection: newSectionParse(lab.section).isNew,
 			});
 		});
 	}
@@ -372,7 +384,7 @@ for (let i = 0; i < totalCourses.length; i++) {
 }
 
 fs.writeFileSync(
-	path.join(__dirname, '..', 'data', 'courses.json'),
+	path.join(__dirname, '..', 'data', `courses-v${VERSION}.json`),
 	JSON.stringify(totalCourses),
 	'utf8'
 );

@@ -89,6 +89,16 @@
 														} - [${parsedClassWeekDays(section.timings)}]`
 													}}
 												</span>
+												<div v-if="section.newSection" class="new-section-tag">
+													<v-tooltip left>
+														<template v-slot:activator="{ on, attrs }">
+															<v-icon color="warning" v-bind="attrs" v-on="on" small>
+																mdi-alert-decagram
+															</v-icon>
+														</template>
+														<span>For New Admissions</span>
+													</v-tooltip>
+												</div>
 											</div>
 										</v-expansion-panel-header>
 										<v-expansion-panel-content class="pt-2">
@@ -269,5 +279,10 @@ export default {
 
 .my-edit-timetable-checkbox .v-input__control .v-messages {
 	display: none !important;
+}
+.new-section-tag {
+	position: absolute;
+	right: 5px;
+	top: 5px;
 }
 </style>

@@ -165,6 +165,14 @@ export default new Vuex.Store({
 	},
 
 	actions: {
+		async removeOldData() {
+			try {
+				await localDB.deleteOldDbs();
+			} catch (e) {
+				console.log(e);
+			}
+		},
+
 		async initializateSchedule(context) {
 			const scheduledCourses = await localDB.readData('SCHEDULED_COURSES');
 

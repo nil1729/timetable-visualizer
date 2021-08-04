@@ -8,6 +8,7 @@ const courseSchema = new mongoose.Schema({
 	comprehensiveExamDate: { type: Date },
 	labs: [
 		{
+			newSection: { type: Boolean, default: false },
 			section: { type: String },
 			dhString: { type: String },
 			timings: [
@@ -23,6 +24,7 @@ const courseSchema = new mongoose.Schema({
 	IC: { type: String },
 	lectures: [
 		{
+			newSection: { type: Boolean, default: false },
 			section: { type: String },
 			dhString: { type: String },
 			timings: [
@@ -37,6 +39,7 @@ const courseSchema = new mongoose.Schema({
 	],
 	tutorials: [
 		{
+			newSection: { type: Boolean, default: false },
 			section: { type: String },
 			dhString: { type: String },
 			timings: [
