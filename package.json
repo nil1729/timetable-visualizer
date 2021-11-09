@@ -19,7 +19,7 @@
 	"devDependencies": {
 		"dotenv": "^10.0.0",
 		"morgan": "^1.10.0",
-		"nodemon": "^2.0.12"
+		"nodemon": "2.0.15"
 	},
 	"dependencies": {
 		"express": "^4.17.1",
