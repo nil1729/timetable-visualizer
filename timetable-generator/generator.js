@@ -337,12 +337,6 @@ const generateTimetableAPI = (course_codes) => {
 			}
 		}
 		generateTimetables(numberOfCourses, courseCombinations, course_codes, 0, TT);
-		// console.log(timetables);
-		fs.writeFile(__dirname + '/generatedTT.json', JSON.stringify(parsedTTs), (err) => {
-			if (err) {
-				console.log(err);
-			}
-		});
 		return parsedTTs;
 	}
 };
