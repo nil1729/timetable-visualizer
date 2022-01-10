@@ -145,7 +145,7 @@ for (let i = 0; i < totalCourses.length; i++) {
 				time = currSec['DAYS & HOURS'],
 				instructors = [];
 
-			lecArr.forEach((l) => instructors.push(l['INSTRUCTOR-IN-CHARGE / Instructor']));
+			lecArr.forEach((l) => instructors.push(l['INSTRUCTOR-IN-CHARGE /Instructor']));
 			profs.push(...instructors);
 
 			lectures.sections[j] = {
@@ -173,7 +173,7 @@ for (let i = 0; i < totalCourses.length; i++) {
 				time = currSec['DAYS & HOURS'],
 				instructors = [];
 
-			lecArr.forEach((l) => instructors.push(l['INSTRUCTOR-IN-CHARGE / Instructor']));
+			lecArr.forEach((l) => instructors.push(l['INSTRUCTOR-IN-CHARGE /Instructor']));
 			profs.push(...instructors);
 
 			tutorial.sections[j] = {
@@ -201,7 +201,7 @@ for (let i = 0; i < totalCourses.length; i++) {
 				time = currSec['DAYS & HOURS'],
 				instructors = [];
 
-			lecArr.forEach((l) => instructors.push(l['INSTRUCTOR-IN-CHARGE / Instructor']));
+			lecArr.forEach((l) => instructors.push(l['INSTRUCTOR-IN-CHARGE /Instructor']));
 			profs.push(...instructors);
 
 			practical.sections[j] = {

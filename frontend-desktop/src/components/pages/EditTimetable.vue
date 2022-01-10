@@ -492,6 +492,11 @@ export default {
 			});
 		},
 	},
+
+	async beforeRouteLeave(to, from, next) {
+		await this.$store.dispatch('saveTimetableSchedule');
+		next();
+	},
 };
 </script>
 <style scoped>
