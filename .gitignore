@@ -1,4 +1,4 @@
 node_modules
 *.env
-# prod
+prod
 package-lock.json
