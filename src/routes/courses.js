@@ -141,4 +141,38 @@ router.get('/:course_static_id', async (req, res) => {
 	}
 });
 
+router.get('/generate/course_details', async (req, res) => {
+	try {
+		const course_ids = req.query.course_ids;
+		let valid_ids = course_ids
+			.split(',')
+			.map((part) => part.trim())
+			.filter((part) => isValidObjectId(part))
+			.map((part) => ObjectId(part));
+
+		let queryArr = [
+			{
+				$match: { _id: { $in: valid_ids } },
+			},
+			{
+				$addFields: {
+					lecturesCount: { $size: '$lectures' },
+					tutorialsCount: { $size: '$tutorials' },
+					labsCount: { $size: '$labs' },
+				},
+			},
+			{
+				$project: {
+					__v: 0,
+				},
+			},
+		];
+
+		let output = await Course.aggregate(queryArr);
+		return res.status(200).json(output);
+	} catch (error) {
+		console.log(error);
+	}
+});
+
 module.exports = router;

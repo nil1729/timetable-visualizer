@@ -25,6 +25,12 @@ const routes = [
 		path: '/share-timetable',
 		meta: { title: 'Share Timetable | Desktop' },
 	},
+	{
+		name: 'GenerateTimetable',
+		component: () => import('@/components/pages/GenerateTimetable.vue'),
+		path: '/generate-timetable',
+		meta: { title: 'Generate Timetable | Desktop' },
+	},
 ];
 
 export default routes;

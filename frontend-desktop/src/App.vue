@@ -110,6 +110,7 @@ export default {
 			items: [
 				{ title: 'Timetable', icon: 'mdi-calendar-clock-outline', page: '' },
 				{ title: 'Edit Timetable', icon: 'mdi-calendar-edit', page: 'edit-timetable' },
+				{ title: 'Generate Timetable', icon: 'mdi-cog-sync-outline', page: 'generate-timetable' },
 				{ title: 'Search Courses', icon: 'mdi-book-search-outline', page: 'search' },
 				{ title: 'Share Timetable', icon: 'mdi-share-all-outline', page: 'share-timetable' },
 			],
