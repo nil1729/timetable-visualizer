@@ -217,6 +217,7 @@
 					<v-pagination
 						v-model="currentTimetableIndex"
 						:length="generatedTimetables.length"
+						:total-visible="20"
 						circle
 						@input="paginationClicked"
 					></v-pagination>
@@ -348,8 +349,8 @@ export default {
 			}
 		},
 
-		paginationClicked(currentPage) {
-			console.log(currentPage);
+		paginationClicked() {
+			this.setUpPagination();
 		},
 
 		setUpPagination() {

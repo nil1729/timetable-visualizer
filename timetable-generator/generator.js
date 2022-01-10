@@ -337,8 +337,15 @@ const generateTimetableAPI = (course_codes) => {
 			}
 		}
 		generateTimetables(numberOfCourses, courseCombinations, course_codes, 0, TT);
+		// console.log(timetables);
+		fs.writeFile(__dirname + '/generatedTT.json', JSON.stringify(parsedTTs), (err) => {
+			if (err) {
+				console.log(err);
+			}
+		});
 		return parsedTTs;
 	}
 };
+generateTimetableAPI(['BITS F311', 'BITS F312', 'CS F303', 'CS F363', 'CS F364', 'CS F372']);
 
 module.exports = generateTimetableAPI;
