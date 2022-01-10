@@ -3,11 +3,7 @@
 		<v-navigation-drawer v-model="drawer" :mini-variant.sync="mini" permanent app>
 			<v-list-item class="px-2">
 				<v-list-item-avatar>
-					<v-btn fab>
-						<v-icon dark>
-							mdi-account-tie
-						</v-icon>
-					</v-btn>
+					<img src="@/assets/bits-logo.png" alt="John" />
 				</v-list-item-avatar>
 
 				<v-list-item-title>BITS Student</v-list-item-title>
@@ -46,9 +42,7 @@
 						</v-list-item-icon>
 
 						<v-list-item-content>
-							<v-list-item-title class="info--text">
-								Feedback
-							</v-list-item-title>
+							<v-list-item-title class="info--text"> Feedback </v-list-item-title>
 						</v-list-item-content>
 					</v-list-item>
 				</v-list>
@@ -56,7 +50,7 @@
 		</v-navigation-drawer>
 
 		<v-app-bar app dense flat>
-			<v-toolbar-title>BITS Timetable Visualizer</v-toolbar-title>
+			<v-toolbar-title>BITS Timetable Companion</v-toolbar-title>
 			<v-spacer></v-spacer>
 
 			<v-btn icon @click="changeTheme">
@@ -71,6 +65,29 @@
 			<save-change-btn />
 			<feedback-dialog ref="myFeedbackDialog" @feedbackSubmit="sendFeedbackToMe" />
 		</v-main>
+
+		<v-divider></v-divider>
+		<v-footer :padless="true">
+			<v-card flat tile width="100%">
+				<v-card-text class="my-footer-text">
+					<h4>
+						<v-icon>mdi-xml</v-icon> with <v-icon small color="red">mdi-heart</v-icon> and
+						<v-icon small color="#8b6910">mdi-coffee</v-icon> By
+						<a href="https://github.com/nil1729" target="_blank" class="my-text-link">Nil Deb</a> &
+						Shaurya
+					</h4>
+					<h4>
+						<a
+							href="https://github.com/nil1729/timetable-visualizer"
+							target="_blank"
+							class="my-text-link"
+						>
+							<v-avatar size="30"> <img src="@/assets/github.svg" alt="John" /> </v-avatar>
+						</a>
+					</h4>
+				</v-card-text>
+			</v-card>
+		</v-footer>
 	</v-app>
 </template>
 
@@ -146,7 +163,7 @@ export default {
 		},
 	},
 	watch: {
-		$route: function(newVal) {
+		$route: function (newVal) {
 			this.selectedMenuTab = this.items.findIndex((item) => `/${item.page}` === newVal.path);
 		},
 	},
@@ -200,5 +217,18 @@ export default {
 }
 .v-calendar.my-view-calender .v-event.v-event-start.v-event-end {
 	width: 100% !important;
+}
+.my-text-link {
+	text-decoration: none;
+	color: inherit;
+}
+.my-footer-text {
+	padding-right: 40px;
+	padding-left: 75px;
+	padding-top: 10px;
+	padding-bottom: 10px;
+	display: flex;
+	justify-content: space-between;
+	align-content: center;
 }
 </style>

@@ -1,0 +1,4 @@
+{
+	"verbose": true,
+	"ignore": ["*.json", "frontend_desktop/*", "public/*", "prod/*"]
+}

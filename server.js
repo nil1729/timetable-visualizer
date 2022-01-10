@@ -1,7 +1,4 @@
-if (process.env.NODE_ENV !== 'production') {
-	require('dotenv').config();
-}
-
+require('dotenv').config();
 const express = require('express');
 const DeviceDetector = require('node-device-detector');
 const DeviceHelper = require('node-device-detector/helper');
@@ -27,8 +24,8 @@ app.use(express.json());
 app.use('/api/v1/courses', courseRoutes);
 app.use('/api/v1/timetable', timetableRoutes);
 
+app.use(express.static(__dirname + '/prod'));
 if (process.env.NODE_ENV === 'production') {
-	app.use(express.static(__dirname + '/prod/desktop'));
 	app.get('*', middlewareDetect, async (req, res) => {
 		if (DeviceHelper.isDesktop(req.deviceInfo)) {
 			res.sendFile(__dirname + '/prod/desktop/index.html');

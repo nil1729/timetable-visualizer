@@ -149,7 +149,7 @@ export default new Vuex.Store({
 
 		CHANGE_SAVE_STATUS(state, current_status) {
 			if (current_status === false) {
-				window.onbeforeunload = function() {
+				window.onbeforeunload = function () {
 					return 'Are you sure you want to leave?';
 				};
 			} else {
@@ -172,6 +172,11 @@ export default new Vuex.Store({
 	},
 
 	actions: {
+		/**
+		 *
+		 * Remove entire course from schedule (IndexedDB Clear)
+		 *
+		 */
 		async removeOldData() {
 			try {
 				await localDB.deleteOldDbs();
@@ -180,6 +185,13 @@ export default new Vuex.Store({
 			}
 		},
 
+		/**
+		 *
+		 * @param {*} context
+		 *
+		 * Get all courses from IndexedDB and setup a 2D Array for the timetable
+		 *
+		 */
 		async initializateSchedule(context) {
 			const scheduledCourses = await localDB.readData('SCHEDULED_COURSES');
 
@@ -213,6 +225,11 @@ export default new Vuex.Store({
 			}
 		},
 
+		/**
+		 *
+		 * @returns indexedDB Data Scheduled Courses
+		 *
+		 */
 		async getMyScheduledCourses() {
 			try {
 				return await localDB.readData('SCHEDULED_COURSES');
@@ -221,6 +238,15 @@ export default new Vuex.Store({
 			}
 		},
 
+		/**
+		 *
+		 * @param {*} context
+		 * @param {*} param1
+		 * @returns
+		 *
+		 * API Requests to get all courses from the server
+		 *
+		 */
 		async sendRequest(context, { url, method, requestBody }) {
 			try {
 				let res = await fetch(`/api/v1/${url}`, {
@@ -234,6 +260,15 @@ export default new Vuex.Store({
 			}
 		},
 
+		/**
+		 *
+		 * @param {*} context
+		 * @param {*} course
+		 * @returns
+		 *
+		 * Add a course to the user's courses Store (indexedDB)
+		 *
+		 */
 		async addCourseToUserStore(context, course) {
 			try {
 				let { clashFound, clashedCourse } = await context.dispatch(
@@ -260,6 +295,14 @@ export default new Vuex.Store({
 			}
 		},
 
+		/**
+		 *
+		 * @param {*} context
+		 * @param {*} course
+		 *
+		 * Comprehensive Exam Clash Check
+		 *
+		 */
 		async checkCompreExamClashes(context, newCourse) {
 			try {
 				const userCourses = await localDB.readData('USER_COURSES');
@@ -280,6 +323,15 @@ export default new Vuex.Store({
 			}
 		},
 
+		/**
+		 *
+		 * @param {*} context
+		 * @param {*} results
+		 * @returns
+		 *
+		 * Filter Search Results based on already added courses
+		 *
+		 */
 		async filterSearchResults(context, results) {
 			try {
 				const userCourses = await localDB.readData('USER_COURSES');
@@ -293,6 +345,12 @@ export default new Vuex.Store({
 			}
 		},
 
+		/**
+		 *
+		 * @param {*} context
+		 *
+		 *  get added courses from indexedDB (Scheduled and not-scheduled)
+		 */
 		async getUserCourses(context) {
 			try {
 				const courses = await localDB.readData('USER_COURSES');
@@ -302,6 +360,14 @@ export default new Vuex.Store({
 			}
 		},
 
+		/**
+		 *
+		 * @param {*} context
+		 * @param {*} course
+		 *
+		 * Remove a course from the user's courses Store (indexedDB)
+		 *
+		 */
 		async removeCourseFromUserStore(context, course) {
 			try {
 				const courseScheduled = context.getters.getCurrentCourseScheduledSections(course._id);
@@ -335,6 +401,14 @@ export default new Vuex.Store({
 			}
 		},
 
+		/**
+		 *
+		 * @param {*} context
+		 * @param {*} param1
+		 * @returns
+		 *
+		 * Add any course section to schedule
+		 */
 		async addSectionToSchedule(context, { sectionType, section, course, oldSection = null }) {
 			try {
 				const indexes = await context.dispatch('parseSectionTimings', section.timings);
@@ -344,6 +418,15 @@ export default new Vuex.Store({
 					sectionType,
 					oldSection,
 				});
+				// console.log(checkLunchHourAvailable);
+				const isLunchHourAvailable = await context.dispatch('checkLunchHourAvailable', indexes);
+				if (!isLunchHourAvailable) {
+					context.commit('ADD_NOTIFICATION', {
+						message: 'PLEASE SELECT ANOTHER SECTION AS LUNCH HOUR IS NOT AVAILABLE',
+						type: 'warning',
+					});
+					return { success: false };
+				}
 
 				if (!clashFound) {
 					context.commit('ADD_TO_SCHEDULE', { indexes, course, section, sectionType });
@@ -362,6 +445,13 @@ export default new Vuex.Store({
 			}
 		},
 
+		/**
+		 *
+		 * @param {*} context
+		 * @param {*} param1
+		 *
+		 * Remove any course section from schedule
+		 */
 		async removeSectionFromSchedule(context, { sectionType, section, course }) {
 			const indexes = await context.dispatch('parseSectionTimings', section.timings);
 			context.commit('REMOVE_FROM_SCHEDULE', indexes);
@@ -421,6 +511,12 @@ export default new Vuex.Store({
 			}
 		},
 
+		/**
+		 *
+		 * @param {*} context
+		 *
+		 * Save the schedule to local indexedDB
+		 */
 		async saveTimetableSchedule(context) {
 			try {
 				const res = await localDB.writeBulkData(
@@ -429,6 +525,52 @@ export default new Vuex.Store({
 				);
 				console.log(res);
 				context.commit('CHANGE_SAVE_STATUS', true);
+			} catch (e) {
+				console.log(e);
+			}
+		},
+
+		async checkLunchHourAvailable(context, newSectionTimings) {
+			try {
+				const currentTimetableSchedule = context.state.timetableSchedule;
+				return newSectionTimings.every((timing) => {
+					let currentDayTiming = currentTimetableSchedule[timing[0]];
+
+					if ([2, 3, 4, 5].includes(timing[1])) {
+						let slot1 = currentDayTiming[4];
+						let slot2 = currentDayTiming[5];
+
+						switch (timing[1]) {
+							case 2:
+								if (timing[2] === 3) slot1 = 'booked';
+								break;
+							case 3:
+								if (timing[2] === 3) {
+									slot1 = 'booked';
+									slot2 = 'booked';
+								}
+								if (timing[2] === 2) slot1 = 'booked';
+								break;
+							case 4:
+								if (timing[2] === 3 || timing[2] === 2) {
+									slot1 = 'booked';
+									slot2 = 'booked';
+								}
+								if (timing[2] === 1) slot1 = 'booked';
+								break;
+							case 5:
+								if (timing[2] === 3 || timing[2] === 2 || timing[2] === 1) {
+									slot2 = 'booked';
+								}
+								break;
+							default:
+								break;
+						}
+
+						if (slot1 && slot2) return false;
+						else return true;
+					} else return true;
+				});
 			} catch (e) {
 				console.log(e);
 			}
