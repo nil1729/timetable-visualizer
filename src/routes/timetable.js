@@ -5,6 +5,7 @@ const Timetable = require('../models/Timetable');
 const _ = require('lodash');
 const { isValidObjectId } = require('mongoose');
 const randomstring = require('randomstring');
+const generateTimetableAPI = require('../../timetable-generator/generator');
 
 /**
  *
@@ -115,5 +116,15 @@ const createShareID = async () => {
 		console.log(error);
 	}
 };
+
+// Generate Timetable
+router.post('/generate-timetable', async (req, res, next) => {
+	try {
+		let result = await generateTimetableAPI(req.body);
+		return res.json(result);
+	} catch (e) {
+		console.log(e);
+	}
+});
 
 module.exports = router;

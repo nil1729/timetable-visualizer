@@ -14,19 +14,13 @@
 										Today
 									</v-btn>
 									<v-btn fab text small color="grey darken-2" @click="prev">
-										<v-icon small>
-											mdi-chevron-left
-										</v-icon>
+										<v-icon small> mdi-chevron-left </v-icon>
 									</v-btn>
 									<v-btn fab text small color="grey darken-2" @click="next">
-										<v-icon small>
-											mdi-chevron-right
-										</v-icon>
+										<v-icon small> mdi-chevron-right </v-icon>
 									</v-btn>
 									<v-toolbar-title v-if="$refs.calendar">
-										<span class="text-subtile-1 primary--text">
-											Timetable Schedule
-										</span>
+										<span class="text-subtile-1 primary--text"> Timetable Schedule </span>
 										<span class="text-subtile-2 ml-2">{{ $refs.calendar.title }} </span>
 									</v-toolbar-title>
 									<v-spacer></v-spacer>
@@ -52,9 +46,7 @@
 														v-on="{ ...tooltip, ...menu }"
 													>
 														<span>{{ typeToLabel[type] }}</span>
-														<v-icon right>
-															mdi-menu-down
-														</v-icon>
+														<v-icon right> mdi-menu-down </v-icon>
 													</v-btn>
 												</template>
 												<span>Change Calender View</span>
@@ -240,6 +232,7 @@ export default {
 		setCalenderSlots(daysArr) {
 			let events = [];
 			let courses = this.getScheduledCourses;
+			console.log(courses);
 
 			for (let j = 0; j < daysArr.length; j++) {
 				let curDt = daysArr[j];
