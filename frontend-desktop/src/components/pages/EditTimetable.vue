@@ -24,17 +24,9 @@
 						</v-container>
 					</div>
 					<div v-else>
-						<div class="pagination-block">
-							<v-container class="max-width my-0 py-0">
-								<v-pagination
-									v-model="pagination.page"
-									class="mt-0 mb-2"
-									:length="pagination.totalPages"
-									:total-visible="3"
-									@input="paginationClicked"
-								></v-pagination>
-							</v-container>
-						</div>
+						<p class="text-subtitle-1 font-weight-medium text-center mb-1">
+							Total {{ totalCourseUnits }} units taken
+						</p>
 						<div class="cards-block">
 							<v-card
 								v-for="course in pagination.currentPageCourse"
@@ -112,6 +104,17 @@
 									</v-row>
 								</v-card-actions>
 							</v-card>
+						</div>
+						<div class="pagination-block">
+							<v-container class="max-width my-0 py-0">
+								<v-pagination
+									v-model="pagination.page"
+									class="mt-0 mb-2"
+									:length="pagination.totalPages"
+									:total-visible="3"
+									@input="paginationClicked"
+								></v-pagination>
+							</v-container>
 						</div>
 					</div>
 				</v-col>
@@ -209,6 +212,7 @@ export default {
 		},
 		userCourses: null,
 		coursesFetching: false,
+		totalCourseUnits: 0,
 		pagination: {
 			currentPageCourse: [],
 			page: 1,
@@ -265,6 +269,10 @@ export default {
 		await this.$store.dispatch('getUserCourses');
 		this.setUpPagination();
 		this.coursesFetching = false;
+
+		let courseUnitsCount = 0;
+		this.getUserCoursesWithTag.forEach((it) => (courseUnitsCount += it.units));
+		this.totalCourseUnits = courseUnitsCount;
 
 		if (_.has(this.$route.query, 'course_id')) {
 			const courseCode = _.get(this.$route.query, 'course_id');

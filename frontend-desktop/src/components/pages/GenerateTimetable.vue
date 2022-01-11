@@ -65,57 +65,81 @@
 												</p>
 											</v-card>
 										</div>
-										<v-expansion-panels focusable v-else>
-											<v-expansion-panel
-												v-for="section in currentCourse[item]"
-												:key="section.section"
-												class="mb-2"
-											>
-												<v-expansion-panel-header class="font-weight-medium">
-													<div class="d-flex justify-start align-center">
-														<span>
-															{{
-																`${section.section} - ${
-																	section.instructors[0]
-																} - [${parsedClassWeekDays(section.timings)}]`
-															}}
-														</span>
-														<div v-if="section.newSection" class="new-section-tag">
-															<v-tooltip left>
-																<template v-slot:activator="{ on, attrs }">
-																	<v-icon color="warning" v-bind="attrs" v-on="on" small>
-																		mdi-alert-decagram
-																	</v-icon>
-																</template>
-																<span>For New Admissions</span>
-															</v-tooltip>
-														</div>
-													</div>
-												</v-expansion-panel-header>
-												<v-expansion-panel-content class="pt-2">
-													<div>
-														<p class="text-body-2 mb-1 font-weight-medium">Timings:</p>
-														<p
-															class="text-body-2 mb-1 ml-4"
-															v-for="timing in section.timings"
-															:key="timing.dayCode"
-														>
-															{{ timing.day }} - {{ timing.time }}
-														</p>
-													</div>
-													<div class="mt-3">
-														<p class="text-body-2 mb-1 font-weight-medium">Instructors:</p>
-														<p
-															class="text-body-2 mb-1 ml-4"
-															v-for="teacher in section.instructors"
-															:key="teacher"
-														>
-															{{ teacher }}
-														</p>
-													</div>
-												</v-expansion-panel-content>
-											</v-expansion-panel>
-										</v-expansion-panels>
+										<div v-else>
+											<div class="preference-radio">
+												<v-radio-group v-model="currentCourse[`${item}_preference`]" row>
+													<v-radio label="Most preferred" value="PREFERRED"></v-radio>
+													<v-radio label="Least preferred" value="UNPREFERRED"></v-radio>
+												</v-radio-group>
+											</div>
+											<div class="section-selection">
+												<v-combobox
+													:label="`Choose ${sectionTypePretty(item)} section`"
+													multiple
+													filled
+													dense
+													flat
+													small-chips
+													:items="parseSectionsList(currentCourse[item])"
+													clearable
+													v-model="currentCourse.preferenceSelection[item]"
+													:deletable-chips="true"
+												></v-combobox>
+											</div>
+											<div id="generate-tt-section-list">
+												<v-expansion-panels focusable>
+													<v-expansion-panel
+														v-for="section in currentCourse[item]"
+														:key="section.section"
+														class="mb-2"
+													>
+														<v-expansion-panel-header class="font-weight-medium">
+															<div class="d-flex justify-start align-center">
+																<span>
+																	{{
+																		`${section.section} - ${
+																			section.instructors[0]
+																		} - [${parsedClassWeekDays(section.timings)}]`
+																	}}
+																</span>
+																<div v-if="section.newSection" class="new-section-tag">
+																	<v-tooltip left>
+																		<template v-slot:activator="{ on, attrs }">
+																			<v-icon color="warning" v-bind="attrs" v-on="on" small>
+																				mdi-alert-decagram
+																			</v-icon>
+																		</template>
+																		<span>For New Admissions</span>
+																	</v-tooltip>
+																</div>
+															</div>
+														</v-expansion-panel-header>
+														<v-expansion-panel-content class="pt-2">
+															<div>
+																<p class="text-body-2 mb-1 font-weight-medium">Timings:</p>
+																<p
+																	class="text-body-2 mb-1 ml-4"
+																	v-for="timing in section.timings"
+																	:key="timing.dayCode"
+																>
+																	{{ timing.day }} - {{ timing.time }}
+																</p>
+															</div>
+															<div class="mt-3">
+																<p class="text-body-2 mb-1 font-weight-medium">Instructors:</p>
+																<p
+																	class="text-body-2 mb-1 ml-4"
+																	v-for="teacher in section.instructors"
+																	:key="teacher"
+																>
+																	{{ teacher }}
+																</p>
+															</div>
+														</v-expansion-panel-content>
+													</v-expansion-panel>
+												</v-expansion-panels>
+											</div>
+										</div>
 									</v-container>
 								</v-tab-item>
 							</div>
@@ -174,7 +198,7 @@
 										<v-toolbar-title v-if="$refs.calendar">
 											<span class="primary--text"> Timetable Schedule </span>
 											<span class="ml-2">{{ $refs.calendar.title }} </span>
-											<small class="ml-2 secondary--text">
+											<small class="ml-2">
 												( Total {{ generatedTimetables.length }} possibilities found )
 											</small>
 											<small class="ml-2 primary--text">
@@ -192,6 +216,17 @@
 										>
 											<v-icon left>mdi-camera</v-icon>
 											save timetable
+										</v-btn>
+										<v-btn
+											outlined
+											tile
+											color="success"
+											depressed
+											class="ml-3"
+											@click="goToInitialState"
+										>
+											<v-icon left>mdi-cog-refresh-outline</v-icon>
+											Generate Again
 										</v-btn>
 									</v-toolbar>
 								</v-sheet>
@@ -272,6 +307,8 @@ export default {
 		isGenerated: false,
 		generatedTimetables: [],
 		currentTimetableIndex: 1,
+		preferenceData: [],
+		preferenceSelection: [],
 		// For Timetable Calender
 		timetableLoading: false,
 		focus: '',
@@ -320,6 +357,22 @@ export default {
 			timings.forEach((timing) => (desiredString += `${timing.dayCode}, `));
 			return desiredString.substring(0, desiredString.length - 2);
 		},
+
+		sectionTypePretty: () => (type) => {
+			return _.capitalize(type).substr(0, type.length - 1);
+		},
+
+		parseSectionsList: () => (list) => {
+			const parsedList = list.map((sec) => {
+				let desiredString = ``;
+				sec.timings.forEach((timing) => (desiredString += `${timing.dayCode}, `));
+				return `${sec.section} - ${sec.instructors[0]} - (${desiredString.substring(
+					0,
+					desiredString.length - 2
+				)})`;
+			});
+			return parsedList;
+		},
 	},
 	methods: {
 		async fetchCourseDetails() {
@@ -335,6 +388,22 @@ export default {
 					return {
 						...item,
 						tab: null,
+						lectures_preference: 'PREFERRED',
+						tutorials_preference: 'PREFERRED',
+						labs_preference: 'PREFERRED',
+						preferenceSelection: {
+							lectures: [],
+							tutorials: [],
+							labs: [],
+						},
+					};
+				});
+				this.preferenceData = this.courseDetailsArr.map((it) => {
+					return {
+						[it.courseCode]: {
+							PREFERRED: { LECTURES: [], TUTORIALS: [], LABS: [] },
+							UNPREFERRED: { LECTURES: [], TUTORIALS: [], LABS: [] },
+						},
 					};
 				});
 				this.loading = false;
@@ -343,14 +412,64 @@ export default {
 			}
 		},
 
+		async goToInitialState() {
+			try {
+				this.loading = true;
+				this.generating = false;
+				this.isGenerated = false;
+				this.currentTimetableIndex = 1;
+				this.generatedTimetables = [];
+				await this.fetchCourseDetails();
+			} catch (e) {
+				console.log(e);
+			}
+		},
+
+		reverseParseSectionString(str, course, sectionType) {
+			let section_code = str.split(' - ')[0];
+			const isNew = course[sectionType].find((it) => it.section === section_code).newSection;
+			if (isNew) return section_code + 'N';
+			return section_code;
+		},
+
 		async generateTimetable() {
 			this.generating = true;
 			try {
-				const course_codes = this.courseDetailsArr.map((it) => it.courseCode);
+				const vm = this;
+				const preference_data = this.courseDetailsArr.map((it) => {
+					let lec_codes = it.preferenceSelection.lectures.map((ll) =>
+						vm.reverseParseSectionString(ll, it, 'lectures')
+					);
+					let tut_codes = it.preferenceSelection.tutorials.map((ll) =>
+						vm.reverseParseSectionString(ll, it, 'tutorials')
+					);
+					let lab_codes = it.preferenceSelection.labs.map((ll) =>
+						vm.reverseParseSectionString(ll, it, 'labs')
+					);
+					let lec_pref = it.lectures_preference === 'PREFERRED';
+					let tut_pref = it.tutorials_preference === 'PREFERRED';
+					let lab_pref = it.labs_preference === 'PREFERRED';
+
+					return {
+						[it.courseCode]: {
+							PREFERRED: {
+								LECTURES: lec_pref ? lec_codes : [],
+								TUTORIALS: tut_pref ? tut_codes : [],
+								LABS: lab_pref ? lab_codes : [],
+							},
+							UNPREFERRED: {
+								LECTURES: !lec_pref ? lec_codes : [],
+								TUTORIALS: !tut_pref ? tut_codes : [],
+								LABS: !lab_pref ? lab_codes : [],
+							},
+						},
+					};
+				});
+
 				const { scheduledCourses } = await this.$store.dispatch('sendRequest', {
 					method: 'POST',
 					url: `timetable/generate-timetable`,
-					requestBody: course_codes,
+					requestBody: preference_data,
 				});
 				const courseDetails = this.courseDetailsArr;
 				this.generatedTimetables = scheduledCourses.map((tt) => {
@@ -599,5 +718,19 @@ export default {
 	position: absolute;
 	top: 50%;
 	transform: translate(0, -50%);
+}
+#timings-container {
+	max-height: 50vh;
+	overflow-y: scroll;
+}
+#timings-container::-webkit-scrollbar {
+	width: 0;
+}
+#generate-tt-section-list {
+	max-height: 30vh;
+	overflow-y: scroll;
+}
+#generate-tt-section-list::-webkit-scrollbar {
+	width: 0;
 }
 </style>
