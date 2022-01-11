@@ -319,10 +319,32 @@
 			{{ currentExportedId }}
 			<template v-slot:action="{ attrs }">
 				<v-btn v-bind="attrs" icon @click="copyExportedLink">
-					<v-icon right>mdi-content-copy</v-icon>
+					<v-icon>mdi-content-copy</v-icon>
 				</v-btn>
 			</template>
 		</v-snackbar>
+		<v-fab-transition>
+			<v-tooltip left>
+				<template v-slot:activator="{ on, attrs }">
+					<v-btn
+						@click="downloadPDF"
+						v-show="isGenerated && generatedTimetables.length > 0"
+						color="info"
+						fixed
+						bottom
+						right
+						fab
+						v-bind="attrs"
+						v-on="on"
+						:loading="pdfDownloading"
+						:disabled="pdfDownloading"
+					>
+						<v-icon>mdi-download-outline</v-icon>
+					</v-btn>
+				</template>
+				<span>Download as PDF</span>
+			</v-tooltip>
+		</v-fab-transition>
 	</div>
 </template>
 
@@ -390,6 +412,7 @@ export default {
 		exportingCurrentTimetable: false,
 		showExportedShareIdAlert: false,
 		currentExportedId: '',
+		pdfDownloading: false,
 	}),
 	computed: {
 		...mapGetters(['getUserCoursesWithTag']),
@@ -422,6 +445,67 @@ export default {
 		},
 	},
 	methods: {
+		async downloadPDF() {
+			try {
+				this.pdfDownloading = true;
+				const vm = this;
+				const preference_data = this.courseDetailsArr.map((it) => {
+					let lec_codes = it.preferenceSelection.lectures.map((ll) =>
+						vm.reverseParseSectionString(ll, it, 'lectures')
+					);
+					let tut_codes = it.preferenceSelection.tutorials.map((ll) =>
+						vm.reverseParseSectionString(ll, it, 'tutorials')
+					);
+					let lab_codes = it.preferenceSelection.labs.map((ll) =>
+						vm.reverseParseSectionString(ll, it, 'labs')
+					);
+					let lec_pref = it.lectures_preference === 'PREFERRED';
+					let tut_pref = it.tutorials_preference === 'PREFERRED';
+					let lab_pref = it.labs_preference === 'PREFERRED';
+
+					return {
+						[it.courseCode]: {
+							PREFERRED: {
+								LECTURES: lec_pref ? lec_codes : [],
+								TUTORIALS: tut_pref ? tut_codes : [],
+								LABS: lab_pref ? lab_codes : [],
+							},
+							UNPREFERRED: {
+								LECTURES: !lec_pref ? lec_codes : [],
+								TUTORIALS: !tut_pref ? tut_codes : [],
+								LABS: !lab_pref ? lab_codes : [],
+							},
+						},
+					};
+				});
+
+				const resp = await fetch('/api/v1/pdf/generate-timetable', {
+					headers: {
+						Accept: 'application/json',
+						'Content-Type': 'application/json',
+					},
+					method: 'POST',
+					body: JSON.stringify(preference_data),
+				});
+				const myFile = await resp.blob();
+				this.saveFileToLocal(myFile);
+				this.pdfDownloading = false;
+			} catch (e) {
+				console.log(e);
+			}
+		},
+
+		async saveFileToLocal(fileObj) {
+			var a = document.createElement('a');
+			document.body.appendChild(a);
+			a.style = 'display: none';
+			const url = window.URL.createObjectURL(fileObj);
+			a.href = url;
+			a.download = `timetable-xyz.pdf`;
+			a.click();
+			window.URL.revokeObjectURL(url);
+		},
+
 		async fetchCourseDetails() {
 			this.loading = true;
 			try {

@@ -7,6 +7,7 @@ const PORT = process.env.PORT || 5000;
 const connectDB = require('./config/db');
 const courseRoutes = require('./src/routes/courses');
 const timetableRoutes = require('./src/routes/timetable');
+const morgan = require('morgan');
 
 // create middleware
 const middlewareDetect = (req, res, next) => {
@@ -21,9 +22,11 @@ const middlewareDetect = (req, res, next) => {
 };
 
 app.use(express.json());
+app.use(morgan('dev'));
 app.use('/api/v1/courses', courseRoutes);
 app.use('/api/v1/timetable', timetableRoutes);
 app.use('/api/v1/feedback', require('./src/routes/feedback'));
+app.use('/api/v1/pdf', require('./src/routes/pdf-generate'));
 
 app.use(express.static(__dirname + '/prod'));
 if (process.env.NODE_ENV === 'production') {
