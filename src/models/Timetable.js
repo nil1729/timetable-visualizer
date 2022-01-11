@@ -4,7 +4,7 @@ const timetableSchema = new mongoose.Schema({
 	shareID: { type: String, unique: true, required: true },
 	scheduledCourses: [
 		{
-			course: { type: mongoose.Types.ObjectId, ref: 'Course' },
+			courseCode: { type: String },
 			lecturesSection: {
 				section: { type: String },
 				dhString: { type: String },

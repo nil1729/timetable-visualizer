@@ -174,35 +174,12 @@
 		<div v-show="isGenerated">
 			<v-container fluid class="px-8 pb-5">
 				<v-row justify="center">
-					<v-col cols="1" style="position: relative" v-if="generatedTimetables.length > 0">
-						<div class="pagination-btn">
-							<v-btn
-								class="mb-4"
-								fab
-								depressed
-								@click="paginationClicked('decrease')"
-								:disabled="currentTimetableIndex === 1"
-							>
-								<v-icon dark> mdi-arrow-up </v-icon>
-							</v-btn>
-
-							<v-btn
-								fab
-								depressed
-								@click="paginationClicked('increase')"
-								:disabled="currentTimetableIndex === generatedTimetables.length"
-							>
-								<v-icon dark> mdi-arrow-down </v-icon>
-							</v-btn>
-						</div>
-					</v-col>
 					<v-col cols="11">
 						<v-row>
 							<v-col>
 								<v-sheet height="64">
 									<v-toolbar flat>
 										<v-toolbar-title v-if="$refs.calendar" v-show="generatedTimetables.length > 0">
-											<span class="primary--text"> Timetable Schedule </span>
 											<span class="ml-2">{{ $refs.calendar.title }} </span>
 											<small class="ml-2">
 												( Total {{ generatedTimetables.length }} possibilities found )
@@ -228,6 +205,18 @@
 											outlined
 											tile
 											color="success"
+											depressed
+											class="mr-2"
+											@click="exportCurrentTimetable"
+											v-show="generatedTimetables.length > 0"
+										>
+											<v-icon left>mdi-share-outline</v-icon>
+											export timetable
+										</v-btn>
+										<v-btn
+											outlined
+											tile
+											color="warning"
 											depressed
 											class="ml-3"
 											@click="goToInitialState"
@@ -294,11 +283,46 @@
 								</v-sheet>
 							</v-col>
 						</v-row>
+						<div class="pagination-btn mt-5" v-if="generatedTimetables.length > 0">
+							<v-btn
+								tile
+								color="info"
+								depressed
+								@click="paginationClicked('decrease')"
+								:disabled="currentTimetableIndex === 1"
+							>
+								<v-icon left>mdi-arrow-left-drop-circle</v-icon>
+								Prev Timetable
+							</v-btn>
+
+							<v-btn
+								tile
+								color="info"
+								depressed
+								class="ml-5"
+								@click="paginationClicked('increase')"
+								:disabled="currentTimetableIndex === generatedTimetables.length"
+							>
+								Next Timetable
+								<v-icon right>mdi-arrow-right-drop-circle</v-icon>
+							</v-btn>
+						</div>
 					</v-col>
 				</v-row>
 			</v-container>
 		</div>
 		<my-show-screenshot ref="myScreenshotViewer" @confirmQuery="saveScreenshot" />
+		<v-overlay :value="exportingCurrentTimetable">
+			<v-progress-circular indeterminate size="64"></v-progress-circular>
+		</v-overlay>
+		<v-snackbar v-model="showExportedShareIdAlert" color="success">
+			{{ currentExportedId }}
+			<template v-slot:action="{ attrs }">
+				<v-btn v-bind="attrs" icon @click="copyExportedLink">
+					<v-icon right>mdi-content-copy</v-icon>
+				</v-btn>
+			</template>
+		</v-snackbar>
 	</div>
 </template>
 
@@ -363,6 +387,9 @@ export default {
 			5: 'F',
 			6: 'S',
 		},
+		exportingCurrentTimetable: false,
+		showExportedShareIdAlert: false,
+		currentExportedId: '',
 	}),
 	computed: {
 		...mapGetters(['getUserCoursesWithTag']),
@@ -511,6 +538,42 @@ export default {
 				this.updateRange({ start: f_date, end: l_date });
 			} catch (err) {
 				console.error(err);
+			}
+		},
+
+		async exportCurrentTimetable() {
+			this.exportingCurrentTimetable = true;
+			try {
+				let current_scheduled_courses = this.isGenerated
+					? this.generatedTimetables[this.currentTimetableIndex - 1]
+					: [];
+				const { shareID } = await this.$store.dispatch('sendRequest', {
+					method: 'POST',
+					url: `timetable/export`,
+					requestBody: current_scheduled_courses,
+				});
+				this.currentExportedId = shareID;
+				this.showExportedShareIdAlert = true;
+				this.exportingCurrentTimetable = false;
+			} catch (e) {
+				console.log(e);
+			}
+		},
+
+		copyExportedLink() {
+			if (this.currentExportedId && this.currentExportedId.length === 32) {
+				if (navigator.clipboard) {
+					const shareLink =
+						window.location.origin + '/share-timetable?share_id=' + this.currentExportedId;
+					navigator.clipboard.writeText(shareLink);
+					this.showExportedShareIdAlert = false;
+				} else {
+					alert("Kindly copy the code manually. Your browser doesn't support click to copy !!");
+				}
+				this.$store.commit('ADD_NOTIFICATION', {
+					message: _.upperCase('copied to clipboard'),
+					type: 'success',
+				});
 			}
 		},
 
@@ -735,10 +798,8 @@ export default {
 }
 .pagination-btn {
 	display: flex;
-	flex-direction: column;
-	position: absolute;
-	top: 50%;
-	transform: translate(0, -50%);
+	justify-content: center;
+	align-items: center;
 }
 #timings-container {
 	max-height: 50vh;

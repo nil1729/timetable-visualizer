@@ -21,13 +21,16 @@ router.post('/export', async (req, res, next) => {
 		if (!Array.isArray(scheduledCourses)) throw new Error('Invalid Timetable');
 
 		for (let i = 0; i < scheduledCourses.length; i++) {
-			if (isValidObjectId(scheduledCourses[i]._id)) {
-				const requiredCourse = await Course.findOne({ _id: scheduledCourses[i]._id }, { _id: 1 });
+			if (_.isString(scheduledCourses[i].courseCode)) {
+				const requiredCourse = await Course.findOne(
+					{ courseCode: scheduledCourses[i].courseCode },
+					{ courseCode: 1 }
+				);
 
 				if (!requiredCourse) throw new Error('Scheduled course not found');
 
 				desiredDoc.scheduledCourses.push({
-					course: requiredCourse._id,
+					courseCode: requiredCourse.courseCode,
 					tutorialsSection: scheduledCourses[i].tutorialsSection,
 					labsSection: scheduledCourses[i].labsSection,
 					lecturesSection: scheduledCourses[i].lecturesSection,
@@ -62,12 +65,12 @@ router.get('/import/:share_id', async (req, res, next) => {
 			{
 				$lookup: {
 					from: 'courses',
-					let: { courseID: '$scheduledCourses.course' },
+					let: { courseCode: '$scheduledCourses.courseCode' },
 					pipeline: [
 						{
 							$match: {
 								$expr: {
-									$and: [{ $eq: ['$_id', '$$courseID'] }],
+									$and: [{ $eq: ['$courseCode', '$$courseCode'] }],
 								},
 							},
 						},
