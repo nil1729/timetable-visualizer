@@ -105,18 +105,16 @@ router.get('/', async (req, res) => {
 
 /**
  *
- * @route /api/v1/courses/:course_static_id
+ * @route /api/v1/courses/:course_code
  *
- * @params course_static_id - Mongo Object ID of the course
+ * @params course_code - BITS Course Code for the course
  *
  */
-router.get('/:course_static_id', async (req, res) => {
+router.get('/:course_code', async (req, res) => {
 	try {
-		if (!isValidObjectId(req.params.course_static_id)) throw new Error('Course ID is not valid!');
-
 		let queryArr = [
 			{
-				$match: { _id: ObjectId(req.params.course_static_id) },
+				$match: { courseCode: req.params.course_code },
 			},
 			{
 				$addFields: {
@@ -143,16 +141,12 @@ router.get('/:course_static_id', async (req, res) => {
 
 router.get('/generate/course_details', async (req, res) => {
 	try {
-		const course_ids = req.query.course_ids;
-		let valid_ids = course_ids
-			.split(',')
-			.map((part) => part.trim())
-			.filter((part) => isValidObjectId(part))
-			.map((part) => ObjectId(part));
+		const course_codes = req.query.course_codes;
+		let valid_codes = course_codes.split(',').map((part) => part.trim());
 
 		let queryArr = [
 			{
-				$match: { _id: { $in: valid_ids } },
+				$match: { courseCode: { $in: valid_codes } },
 			},
 			{
 				$addFields: {

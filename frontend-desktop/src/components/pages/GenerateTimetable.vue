@@ -18,7 +18,7 @@
 				<div class="my-container" v-else>
 					<v-card
 						v-for="currentCourse in courseDetailsArr"
-						:key="currentCourse._id"
+						:key="currentCourse.courseCode"
 						class="my-generate-course-card"
 					>
 						<v-card-title class="text-body-1 pb-1">
@@ -144,6 +144,28 @@
 		<div v-show="isGenerated">
 			<v-container fluid class="px-8 pb-5">
 				<v-row justify="center">
+					<v-col cols="1" style="position: relative">
+						<div class="pagination-btn">
+							<v-btn
+								class="mb-4"
+								fab
+								depressed
+								@click="paginationClicked('decrease')"
+								:disabled="currentTimetableIndex === 1"
+							>
+								<v-icon dark> mdi-arrow-up </v-icon>
+							</v-btn>
+
+							<v-btn
+								fab
+								depressed
+								@click="paginationClicked('increase')"
+								:disabled="currentTimetableIndex === generatedTimetables.length"
+							>
+								<v-icon dark> mdi-arrow-down </v-icon>
+							</v-btn>
+						</div>
+					</v-col>
 					<v-col cols="11">
 						<v-row>
 							<v-col>
@@ -152,6 +174,12 @@
 										<v-toolbar-title v-if="$refs.calendar">
 											<span class="primary--text"> Timetable Schedule </span>
 											<span class="ml-2">{{ $refs.calendar.title }} </span>
+											<small class="ml-2 secondary--text">
+												( Total {{ generatedTimetables.length }} possibilities found )
+											</small>
+											<small class="ml-2 primary--text">
+												[ Timetable {{ currentTimetableIndex }} ]
+											</small>
 										</v-toolbar-title>
 										<v-spacer></v-spacer>
 										<v-btn
@@ -213,17 +241,9 @@
 						</v-row>
 					</v-col>
 				</v-row>
-				<div class="text-center mt-4">
-					<v-pagination
-						v-model="currentTimetableIndex"
-						:length="generatedTimetables.length"
-						:total-visible="20"
-						circle
-						@input="paginationClicked"
-					></v-pagination>
-				</div>
 			</v-container>
 		</div>
+		<my-show-screenshot ref="myScreenshotViewer" @confirmQuery="saveScreenshot" />
 	</div>
 </template>
 
@@ -232,8 +252,13 @@ import _ from 'lodash';
 import html2canvas from 'html2canvas';
 import moment from 'moment';
 import { mapGetters } from 'vuex';
+import ShowScreenshots from '@/components/layouts/ShowScreenshot.vue';
+
 export default {
 	name: 'generate-timetable',
+	components: {
+		'my-show-screenshot': ShowScreenshots,
+	},
 	data: () => ({
 		skeletonAttrs: {
 			class: 'mb-1',
@@ -301,10 +326,10 @@ export default {
 			this.loading = true;
 			try {
 				await this.$store.dispatch('getUserCourses');
-				const course_ids = this.getUserCoursesWithTag.map((it) => it._id).join(',');
+				const course_codes = this.getUserCoursesWithTag.map((it) => it.courseCode).join(',');
 				const resp = await this.$store.dispatch('sendRequest', {
 					method: 'GET',
-					url: `courses/generate/course_details?course_ids=${course_ids}`,
+					url: `courses/generate/course_details?course_codes=${course_codes}`,
 				});
 				this.courseDetailsArr = resp.map((item) => {
 					return {
@@ -349,7 +374,12 @@ export default {
 			}
 		},
 
-		paginationClicked() {
+		paginationClicked(direction) {
+			if (direction === 'increase') {
+				this.currentTimetableIndex = this.currentTimetableIndex + 1;
+			} else if (direction === 'decrease') {
+				this.currentTimetableIndex = this.currentTimetableIndex - 1;
+			}
 			this.setUpPagination();
 		},
 
@@ -557,5 +587,17 @@ export default {
 	to {
 		transform: rotate(360deg);
 	}
+}
+.new-section-tag {
+	position: absolute;
+	right: 5px;
+	top: 5px;
+}
+.pagination-btn {
+	display: flex;
+	flex-direction: column;
+	position: absolute;
+	top: 50%;
+	transform: translate(0, -50%);
 }
 </style>

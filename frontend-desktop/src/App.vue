@@ -74,7 +74,7 @@
 						<v-icon>mdi-xml</v-icon> with <v-icon small color="red">mdi-heart</v-icon> and
 						<v-icon small color="#8b6910">mdi-coffee</v-icon> By
 						<a href="https://github.com/nil1729" target="_blank" class="my-text-link">Nil Deb</a> &
-						Shaurya
+						<a href="https://github.com/spidy102" target="_blank" class="my-text-link">Shaurya</a>
 					</h4>
 					<h4>
 						<a

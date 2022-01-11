@@ -55,14 +55,14 @@ export default new Vuex.Store({
 		getScheduledCourses(state) {
 			return state.scheduledCourses;
 		},
-		getCurrentCourseScheduledSections: (state) => (id) => {
-			return state.scheduledCourses.find((sb) => sb._id === id);
+		getCurrentCourseScheduledSections: (state) => (code) => {
+			return state.scheduledCourses.find((sb) => sb.courseCode === code);
 		},
 		getSectionType: (state) => (sectionID) => {
 			return state.sectionTypeMapping[sectionID[0]];
 		},
 		getUserCoursesWithTag: (state) => {
-			const IDs = state.scheduledCourses.map((sb) => {
+			const courseCodes = state.scheduledCourses.map((sb) => {
 				const sectionTypes = state.sectionTypes;
 				let fullfilled = sectionTypes.every((sectionType) => {
 					let keyword = sectionType + 'Section';
@@ -73,11 +73,11 @@ export default new Vuex.Store({
 						return true;
 					return false;
 				});
-				if (fullfilled) return sb._id;
+				if (fullfilled) return sb.courseCode;
 				else return undefined;
 			});
 			return state.userCourses.map((sb) => {
-				if (IDs.includes(sb._id)) {
+				if (courseCodes.includes(sb.courseCode)) {
 					return { ...sb, scheduled: true };
 				} else {
 					return { ...sb, scheduled: false };
@@ -116,11 +116,13 @@ export default new Vuex.Store({
 		},
 
 		ADD_COURSE_FOR_TIMETABLE(state, { course, section, sectionType }) {
-			const existingCourseIndex = state.scheduledCourses.findIndex((c) => c._id === course._id);
+			const existingCourseIndex = state.scheduledCourses.findIndex(
+				(c) => c.courseCode === course.courseCode
+			);
 
 			if (existingCourseIndex !== -1) {
 				state.scheduledCourses = state.scheduledCourses.map((c) => {
-					if (course._id === c._id) {
+					if (course.courseCode === c.courseCode) {
 						return { ...c, [`${sectionType}Section`]: section };
 					} else {
 						return c;
@@ -134,11 +136,13 @@ export default new Vuex.Store({
 			}
 		},
 		REMOVE_COURSE_SECTION_FROM_SCHEDULE(state, { course, sectionType }) {
-			const existingCourseIndex = state.scheduledCourses.findIndex((c) => c._id === course._id);
+			const existingCourseIndex = state.scheduledCourses.findIndex(
+				(c) => c.courseCode === course.courseCode
+			);
 
 			if (existingCourseIndex !== -1) {
 				state.scheduledCourses = state.scheduledCourses.map((c) => {
-					if (course._id === c._id) {
+					if (course.courseCode === c.courseCode) {
 						return { ...c, [`${sectionType}Section`]: undefined };
 					} else {
 						return c;
@@ -161,13 +165,15 @@ export default new Vuex.Store({
 			state.scheduledCourses = courses;
 		},
 		REMOVE_ENTIRE_COURSE_FROM_SCHEDULE(state, course) {
-			state.scheduledCourses = state.scheduledCourses.filter((sb) => sb._id !== course._id);
+			state.scheduledCourses = state.scheduledCourses.filter(
+				(sb) => sb.courseCode !== course.courseCode
+			);
 		},
 		SET_USER_COURSES(state, courses) {
 			state.userCourses = courses;
 		},
-		REMOVE_USER_COURSE(state, courseID) {
-			state.userCourses = state.userCourses.filter((sb) => sb._id !== courseID);
+		REMOVE_USER_COURSE(state, courseCode) {
+			state.userCourses = state.userCourses.filter((sb) => sb.courseCode !== courseCode);
 		},
 	},
 
@@ -335,9 +341,9 @@ export default new Vuex.Store({
 		async filterSearchResults(context, results) {
 			try {
 				const userCourses = await localDB.readData('USER_COURSES');
-				const userCoursesIDs = userCourses.map((course) => course._id);
+				const userCoursesCodes = userCourses.map((course) => course.courseCode);
 				return results.map((course) => {
-					if (userCoursesIDs.includes(course._id)) return { ...course, added: true };
+					if (userCoursesCodes.includes(course.courseCode)) return { ...course, added: true };
 					else return course;
 				});
 			} catch (e) {
@@ -370,7 +376,9 @@ export default new Vuex.Store({
 		 */
 		async removeCourseFromUserStore(context, course) {
 			try {
-				const courseScheduled = context.getters.getCurrentCourseScheduledSections(course._id);
+				const courseScheduled = context.getters.getCurrentCourseScheduledSections(
+					course.courseCode
+				);
 
 				if (courseScheduled) {
 					const sectionTypes = context.state.sectionTypes;
@@ -387,11 +395,11 @@ export default new Vuex.Store({
 					}
 				}
 
-				await localDB.removeItemFromStore('USER_COURSES', course._id);
-				await localDB.removeItemFromStore('SCHEDULED_COURSES', course._id);
+				await localDB.removeItemFromStore('USER_COURSES', course.courseCode);
+				await localDB.removeItemFromStore('SCHEDULED_COURSES', course.courseCode);
 
 				context.commit('REMOVE_ENTIRE_COURSE_FROM_SCHEDULE', course);
-				context.commit('REMOVE_USER_COURSE', course._id);
+				context.commit('REMOVE_USER_COURSE', course.courseCode);
 				context.commit('ADD_NOTIFICATION', {
 					message: `${course.courseName} (${course.courseCode}) REMOVED`,
 					type: 'info',
@@ -487,7 +495,7 @@ export default new Vuex.Store({
 						let slotCourse = context.state.timetableSchedule[indexes[i][0]][indexes[i][1] + j];
 
 						if (slotCourse) {
-							if (course && slotCourse._id === course._id && oldSection) {
+							if (course && slotCourse.courseCode === course.courseCode && oldSection) {
 								// Some Logic
 							} else {
 								clashedCourse = slotCourse;
@@ -519,11 +527,7 @@ export default new Vuex.Store({
 		 */
 		async saveTimetableSchedule(context) {
 			try {
-				const res = await localDB.writeBulkData(
-					'SCHEDULED_COURSES',
-					context.state.scheduledCourses
-				);
-				console.log(res);
+				await localDB.writeBulkData('SCHEDULED_COURSES', context.state.scheduledCourses);
 				context.commit('CHANGE_SAVE_STATUS', true);
 			} catch (e) {
 				console.log(e);

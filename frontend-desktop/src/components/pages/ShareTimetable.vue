@@ -12,15 +12,11 @@
 				</v-toolbar>
 				<v-tabs vertical v-model="selectedTab">
 					<v-tab>
-						<v-icon left>
-							mdi-calendar-import
-						</v-icon>
+						<v-icon left> mdi-calendar-import </v-icon>
 						import
 					</v-tab>
 					<v-tab>
-						<v-icon left>
-							mdi-calendar-export
-						</v-icon>
+						<v-icon left> mdi-calendar-export </v-icon>
 						export
 					</v-tab>
 
@@ -156,9 +152,7 @@
 										>
 											<template v-slot:prepend-inner>
 												<div class="mr-3">
-													<v-icon>
-														mdi-share-variant
-													</v-icon>
+													<v-icon> mdi-share-variant </v-icon>
 												</div>
 											</template>
 										</v-text-field>
@@ -171,8 +165,8 @@
 											depressed
 											v-if="
 												!exportTimetable.timetableLoading &&
-													exportTimetable.timetableExists &&
-													!myTimetableExported
+												exportTimetable.timetableExists &&
+												!myTimetableExported
 											"
 											@click="exportMyTimetable"
 										>
@@ -325,7 +319,7 @@ export default {
 	}),
 
 	watch: {
-		selectedTab: function(newVal) {
+		selectedTab: function (newVal) {
 			if (newVal === 1) this.fecthMyTimetable();
 		},
 	},
@@ -427,7 +421,6 @@ export default {
 				return {
 					...c,
 					...c.courseDetail,
-					_id: c.courseDetail._id,
 					courseDetail: undefined,
 					course: undefined,
 				};
@@ -512,7 +505,7 @@ export default {
 					color: this.colorsMapper[type],
 					name: `${course.courseCode} - ${currSlot.section}`,
 					title: `${course.courseName}`,
-					courseID: course._id,
+					courseID: course.courseCode,
 					details: `
 						<div class='black--text'>
 							<h4>${this.typesMapper[type]} Section - ${currSlot.section}</h4>

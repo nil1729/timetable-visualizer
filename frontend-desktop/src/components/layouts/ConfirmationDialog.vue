@@ -5,18 +5,12 @@
 				Are you sure to remove {{ currentCourse.courseName }} ({{ currentCourse.courseCode }})
 			</v-card-title>
 			<v-card-text>
-				<div class="text-body-1">
-					This course currently scheduled on your timetable
-				</div>
+				<div class="text-body-1">This course currently scheduled on your timetable</div>
 			</v-card-text>
 			<v-card-actions>
 				<v-spacer></v-spacer>
-				<v-btn color="green darken-1" text @click="confirmQuery(false)">
-					No
-				</v-btn>
-				<v-btn color="green darken-1" text @click="confirmQuery(true)">
-					Yes
-				</v-btn>
+				<v-btn color="green darken-1" text @click="confirmQuery(false)"> No </v-btn>
+				<v-btn color="green darken-1" text @click="confirmQuery(true)"> Yes </v-btn>
 			</v-card-actions>
 		</v-card>
 	</v-dialog>
@@ -42,7 +36,7 @@ export default {
 		},
 
 		confirmQuery(choosenOption) {
-			this.$emit('confirmQuery', { choosenOption, courseID: this.currentCourse._id });
+			this.$emit('confirmQuery', { choosenOption, courseID: this.currentCourse.courseCode });
 		},
 	},
 };

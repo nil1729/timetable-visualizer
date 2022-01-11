@@ -3,29 +3,27 @@
 		<v-dialog v-model="dialog" width="375" height="90%" content-class="my-course-info-dialog">
 			<v-card v-if="currentCourse" height="90vh">
 				<v-card-title class="text-body-1">
-					<v-icon left color="primary" small>
-						mdi-bookmark-multiple
-					</v-icon>
+					<v-icon left color="primary" small> mdi-bookmark-multiple </v-icon>
 					<span>{{ currentCourse.courseCode }}</span>
 				</v-card-title>
 
 				<v-card-text class="pb-2">
-					<div class="text-subtitle-1  font-weight-medium">
+					<div class="text-subtitle-1 font-weight-medium">
 						{{ currentCourse.courseName }}
 					</div>
 				</v-card-text>
 
 				<v-card-text class="text-body-1 pb-1">
 					<div>
-						<span class=" font-weight-medium">Course Units:{{ ' ' }}</span>
+						<span class="font-weight-medium">Course Units:{{ ' ' }}</span>
 						<span>{{ currentCourse.units }}</span>
 					</div>
 					<div>
-						<span class=" font-weight-medium">Course IC:{{ ' ' }}</span>
+						<span class="font-weight-medium">Course IC:{{ ' ' }}</span>
 						<span>{{ currentCourse.IC }}</span>
 					</div>
 					<div>
-						<span class=" font-weight-medium">Comprehensive Exam:{{ ' ' }}</span>
+						<span class="font-weight-medium">Comprehensive Exam:{{ ' ' }}</span>
 						<span>{{ formattedExamDate(currentCourse.comprehensiveExamDate) }}</span>
 					</div>
 				</v-card-text>
@@ -103,9 +101,7 @@
 										</v-expansion-panel-header>
 										<v-expansion-panel-content class="pt-2">
 											<div>
-												<p class="text-body-2 mb-1  font-weight-medium">
-													Timings:
-												</p>
+												<p class="text-body-2 mb-1 font-weight-medium">Timings:</p>
 												<p
 													class="text-body-2 mb-1 ml-4"
 													v-for="timing in section.timings"
@@ -115,9 +111,7 @@
 												</p>
 											</div>
 											<div class="mt-3">
-												<p class="text-body-2 mb-1  font-weight-medium">
-													Instructors:
-												</p>
+												<p class="text-body-2 mb-1 font-weight-medium">Instructors:</p>
 												<p
 													class="text-body-2 mb-1 ml-4"
 													v-for="teacher in section.instructors"
@@ -176,7 +170,7 @@ export default {
 			this.timingsLoading = true;
 			const { lectures, labs, tutorials } = await this.$store.dispatch('sendRequest', {
 				method: 'GET',
-				url: `courses/${this.currentCourse._id}`,
+				url: `courses/${this.currentCourse.courseCode}`,
 			});
 			this.timings = { lectures, labs, tutorials };
 			this.setupCheckboxes();
@@ -186,7 +180,7 @@ export default {
 		setupCheckboxes() {
 			let checkboxes = {};
 			let timings = this.timings;
-			const courseScheduled = this.getCurrentCourseScheduledSections(this.currentCourse._id);
+			const courseScheduled = this.getCurrentCourseScheduledSections(this.currentCourse.courseCode);
 
 			this.tabItems.forEach((tab) => {
 				checkboxes[tab] = {};
@@ -213,7 +207,9 @@ export default {
 			const clickedSection = this.timings[sectionType].find((sc) => sc.section === sectionID);
 
 			if (this.checkboxes[sectionType][sectionID]) {
-				const scheduledCourse = this.getCurrentCourseScheduledSections(this.currentCourse._id);
+				const scheduledCourse = this.getCurrentCourseScheduledSections(
+					this.currentCourse.courseCode
+				);
 				let oldSection;
 
 				if (scheduledCourse) {
