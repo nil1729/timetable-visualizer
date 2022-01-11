@@ -299,6 +299,11 @@ export default {
 			this.setCalenderSlots(daysArr, newVal);
 			this.setUpPagination('last_page');
 		},
+		getUserCoursesWithTag: function (newVal) {
+			let courseUnitsCount = 0;
+			newVal.forEach((it) => (courseUnitsCount += it.units));
+			this.totalCourseUnits = courseUnitsCount;
+		},
 	},
 
 	methods: {
