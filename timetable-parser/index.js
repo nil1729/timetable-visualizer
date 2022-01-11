@@ -14,7 +14,6 @@ const daysMapper = {
 	Th: 'Thursday',
 	F: 'Friday',
 	S: 'Saturday',
-	S: 'Sunday',
 };
 
 // Class Hours to actual timings
