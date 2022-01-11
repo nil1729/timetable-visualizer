@@ -19,9 +19,7 @@
 						<v-container>
 							<v-row justify="center">
 								<v-img contain src="@/assets/empty.png"></v-img>
-								<p class="text-overline text-center">
-									Your Course Collection is Empty
-								</p>
+								<p class="text-overline text-center">Your Course Collection is Empty</p>
 							</v-row>
 						</v-container>
 					</div>
@@ -40,14 +38,14 @@
 						<div class="cards-block">
 							<v-card
 								v-for="course in pagination.currentPageCourse"
-								:key="course._id"
+								:key="course.courseCode"
 								class="mx-auto mb-4"
 								max-width="400"
 							>
 								<v-tooltip right>
 									<template v-slot:activator="{ on, attrs }">
 										<v-icon
-											@click="removeCourse(course._id)"
+											@click="removeCourse(course.courseCode)"
 											class="my-remove-icon"
 											color="error"
 											v-bind="attrs"
@@ -60,9 +58,7 @@
 
 								<v-card-text class="mb-0 pb-0">
 									<div class="text-subtitle-2 mb-1 primary--text">
-										<v-icon left color="primary" small>
-											mdi-bookmark-multiple
-										</v-icon>
+										<v-icon left color="primary" small> mdi-bookmark-multiple </v-icon>
 										<span>{{ course.courseCode }}</span>
 									</div>
 									<div class="text-subtitle-2 font-weight-medium">
@@ -271,8 +267,10 @@ export default {
 		this.coursesFetching = false;
 
 		if (_.has(this.$route.query, 'course_id')) {
-			const courseID = _.get(this.$route.query, 'course_id');
-			const requestedCourse = this.getUserCoursesWithTag.find((course) => course._id === courseID);
+			const courseCode = _.get(this.$route.query, 'course_id');
+			const requestedCourse = this.getUserCoursesWithTag.find(
+				(course) => course.courseCode === courseCode
+			);
 			if (requestedCourse) this.$refs.courseInformation.showInfo(requestedCourse);
 			else {
 				this.$router.replace({
@@ -288,7 +286,7 @@ export default {
 	},
 
 	watch: {
-		getScheduledCourses: function(newVal) {
+		getScheduledCourses: function (newVal) {
 			let daysArr = this.getDaysArray(this.startTimestamp.date, this.endTimestamp.date);
 			this.setCalenderSlots(daysArr, newVal);
 			this.setUpPagination('last_page');
@@ -320,9 +318,11 @@ export default {
 			this.setUpPagination(currentPage);
 		},
 
-		async removeCourse(courseID) {
-			const deletedCourse = this.getUserCoursesWithTag.find((course) => course._id === courseID);
-			const courseScheduled = this.getCurrentCourseScheduledSections(deletedCourse._id);
+		async removeCourse(courseCode) {
+			const deletedCourse = this.getUserCoursesWithTag.find(
+				(course) => course.courseCode === courseCode
+			);
+			const courseScheduled = this.getCurrentCourseScheduledSections(deletedCourse.courseCode);
 
 			if (courseScheduled) {
 				this.$refs.confirmationDialog.showDialog(courseScheduled);
@@ -333,7 +333,9 @@ export default {
 
 		async confirmationSubmit({ choosenOption, courseID }) {
 			if (choosenOption) {
-				const deletedCourse = this.getUserCoursesWithTag.find((course) => course._id === courseID);
+				const deletedCourse = this.getUserCoursesWithTag.find(
+					(course) => course.courseCode === courseID
+				);
 				this.confirmRemove(deletedCourse);
 			}
 			this.$refs.confirmationDialog.hideDialog();
@@ -342,7 +344,7 @@ export default {
 		async confirmRemove(course) {
 			if (_.has(this.$route.query, 'course_id')) {
 				const requestedCourseID = _.get(this.$route.query, 'course_id');
-				if (requestedCourseID === course._id)
+				if (requestedCourseID === course.courseCode)
 					this.$router.replace({
 						name: 'EditTimetable',
 						query: { ...this.$route.query, course_id: undefined },
@@ -356,14 +358,14 @@ export default {
 		async showCourseInfo(course) {
 			if (_.has(this.$route.query, 'course_id')) {
 				const requestedCourseID = _.get(this.$route.query, 'course_id');
-				if (requestedCourseID === course._id) {
+				if (requestedCourseID === course.courseCode) {
 					this.$refs.courseInformation.showInfo(course);
 					return;
 				}
 			}
 			this.$router.replace({
 				name: 'EditTimetable',
-				query: { ...this.$route.query, course_id: course._id },
+				query: { ...this.$route.query, course_id: course.courseCode },
 			});
 			this.$refs.courseInformation.showInfo(course);
 		},
@@ -423,7 +425,7 @@ export default {
 					color: this.colorsMapper[type],
 					name: `${course.courseCode} - ${currSlot.section}`,
 					title: `${course.courseName}`,
-					courseID: course._id,
+					courseID: course.courseCode,
 					details: `
 					<div class='black--text'>
 						<h4>Course Code:  ${course.courseCode}</h4>

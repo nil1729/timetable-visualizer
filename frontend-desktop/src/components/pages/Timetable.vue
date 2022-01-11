@@ -268,7 +268,7 @@ export default {
 					color: this.colorsMapper[type],
 					name: `${course.courseCode} - ${currSlot.section}`,
 					title: `${course.courseName}`,
-					courseID: course._id,
+					courseID: course.courseCode,
 					details: `
 						<div class='black--text'>
 							<h4>${this.typesMapper[type]} Section - ${currSlot.section}</h4>

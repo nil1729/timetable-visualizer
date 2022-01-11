@@ -66,13 +66,11 @@
 			</div>
 			<v-container>
 				<v-row justify="center" class="mb-3">
-					<v-col v-for="course in searchResults" :key="course._id" cols="4"
+					<v-col v-for="course in searchResults" :key="course.courseCode" cols="4"
 						><v-card class="mx-auto" max-width="400">
 							<v-card-text class="mb-0 pb-0">
 								<div class="text-subtitle-2 mb-1 primary--text">
-									<v-icon left color="primary" small>
-										mdi-bookmark-multiple
-									</v-icon>
+									<v-icon left color="primary" small> mdi-bookmark-multiple </v-icon>
 									<span>{{ course.courseCode }}</span>
 								</div>
 								<div class="text-subtitle-1 font-weight-medium">
@@ -102,12 +100,12 @@
 							<v-card-actions>
 								<v-row align="center" justify="end" class="px-2 pb-2">
 									<v-btn
-										class="ma-2 "
+										class="ma-2"
 										:class="{ 'disabled-btn': course.added }"
 										:color="course.added ? 'success' : 'primary'"
 										small
 										depressed
-										@click="addCourse(course._id)"
+										@click="addCourse(course.courseCode)"
 										:tile="course.added"
 										:outlined="!course.added"
 									>
@@ -176,11 +174,11 @@ export default {
 		},
 
 		async addCourse(courseID) {
-			const newCourse = this.searchResults.find((course) => course._id === courseID);
+			const newCourse = this.searchResults.find((course) => course.courseCode === courseID);
 			const courseAdded = await this.$store.dispatch('addCourseToUserStore', newCourse);
 			if (courseAdded)
 				this.searchResults = this.searchResults.map((course) =>
-					course._id == courseID ? { ...newCourse, added: true } : course
+					course.courseCode == courseID ? { ...newCourse, added: true } : course
 				);
 		},
 	},
@@ -190,7 +188,7 @@ export default {
 	},
 
 	watch: {
-		typedText: function(newVal, oldVal) {
+		typedText: function (newVal, oldVal) {
 			if (_.isNull(newVal)) {
 				this.fetchCourses();
 			} else if (newVal.trim().length >= 3) {
