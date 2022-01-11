@@ -137,28 +137,25 @@ export default {
 			this.$refs.myFeedbackDialog.showDialog();
 		},
 		async sendFeedbackToMe(data) {
-			const FEEDBACK_SUBMISSION_URL = 'https://formspree.io/f/mleawybk';
-			const formdata = new FormData();
-			formdata.append('Feedback Message ', data.text);
-			formdata.append('Ratings', `${data.rating}/5`);
-			const requestOptions = {
-				method: 'POST',
-				headers: {
-					Accept: 'application/json',
-				},
-				body: formdata,
-				redirect: 'follow',
-			};
 			try {
-				await fetch(FEEDBACK_SUBMISSION_URL, requestOptions);
-				this.$store.commit('ADD_NOTIFICATION', {
-					message: _.upperCase('thanks for your feedback'),
-					type: 'success',
+				const resp = await this.$store.dispatch('sendRequest', {
+					method: 'POST',
+					url: `feedback/to-me`,
+					requestBody: {
+						feedback_message: data.text,
+						rating: `${data.rating}/5`,
+					},
 				});
+				if (resp.success) {
+					this.$store.commit('ADD_NOTIFICATION', {
+						message: _.upperCase('thanks for your feedback'),
+						type: 'success',
+					});
+				}
 			} catch (e) {
 				this.$store.commit('ADD_NOTIFICATION', {
 					message: _.upperCase('unknown error occurred while processing your feedback'),
-					type: 'success',
+					type: 'error',
 				});
 			}
 		},
