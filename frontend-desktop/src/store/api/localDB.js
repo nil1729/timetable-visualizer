@@ -1,5 +1,5 @@
 import { openDB } from 'idb';
-const DB_VERSION = 2;
+const DB_VERSION = 3;
 const DB_NAME = 'TIMETABLE_BITS_PILANI_VERSION_' + DB_VERSION;
 const DB_STORES = ['USER_COURSES', 'SCHEDULED_COURSES'];
 
