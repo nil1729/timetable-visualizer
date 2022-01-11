@@ -67,9 +67,15 @@
 										</div>
 										<div v-else>
 											<div class="preference-radio">
-												<v-radio-group v-model="currentCourse[`${item}_preference`]" row>
-													<v-radio label="Most preferred" value="PREFERRED"></v-radio>
-													<v-radio label="Least preferred" value="UNPREFERRED"></v-radio>
+												<v-radio-group v-model="currentCourse[`${item}_preference`]">
+													<v-radio
+														label="I definitely want these sections"
+														value="PREFERRED"
+													></v-radio>
+													<v-radio
+														label="I definitely don't want these sections"
+														value="UNPREFERRED"
+													></v-radio>
 												</v-radio-group>
 											</div>
 											<div class="section-selection">
@@ -168,7 +174,7 @@
 		<div v-show="isGenerated">
 			<v-container fluid class="px-8 pb-5">
 				<v-row justify="center">
-					<v-col cols="1" style="position: relative">
+					<v-col cols="1" style="position: relative" v-if="generatedTimetables.length > 0">
 						<div class="pagination-btn">
 							<v-btn
 								class="mb-4"
@@ -195,7 +201,7 @@
 							<v-col>
 								<v-sheet height="64">
 									<v-toolbar flat>
-										<v-toolbar-title v-if="$refs.calendar">
+										<v-toolbar-title v-if="$refs.calendar" v-show="generatedTimetables.length > 0">
 											<span class="primary--text"> Timetable Schedule </span>
 											<span class="ml-2">{{ $refs.calendar.title }} </span>
 											<small class="ml-2">
@@ -213,6 +219,7 @@
 											depressed
 											class="mr-5"
 											@click="takeScreenshot"
+											v-show="generatedTimetables.length > 0"
 										>
 											<v-icon left>mdi-camera</v-icon>
 											save timetable
@@ -230,7 +237,20 @@
 										</v-btn>
 									</v-toolbar>
 								</v-sheet>
-								<v-sheet id="my-main-timetable-box">
+								<div class="my-404-generated mt-5" v-if="generatedTimetables.length === 0">
+									<v-img
+										height="450"
+										width="450"
+										style="margin: auto"
+										src="@/assets/404-generated.svg"
+									></v-img>
+									<p class="text-center body-1 mt-3">
+										{{
+											'We did not found any timetable based on the given preferences !!'.toUpperCase()
+										}}
+									</p>
+								</div>
+								<v-sheet id="my-main-timetable-box" v-show="generatedTimetables.length > 0">
 									<v-calendar
 										class="my-view-calender"
 										ref="calendar"
@@ -419,6 +439,7 @@ export default {
 				this.isGenerated = false;
 				this.currentTimetableIndex = 1;
 				this.generatedTimetables = [];
+				this.events = [];
 				await this.fetchCourseDetails();
 			} catch (e) {
 				console.log(e);
@@ -732,5 +753,9 @@ export default {
 }
 #generate-tt-section-list::-webkit-scrollbar {
 	width: 0;
+}
+.my-404-generated {
+	display: flex;
+	flex-direction: column;
 }
 </style>
