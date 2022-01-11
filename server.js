@@ -23,6 +23,7 @@ const middlewareDetect = (req, res, next) => {
 app.use(express.json());
 app.use('/api/v1/courses', courseRoutes);
 app.use('/api/v1/timetable', timetableRoutes);
+app.use('/api/v1/feedback', require('./src/routes/feedback'));
 
 app.use(express.static(__dirname + '/prod'));
 if (process.env.NODE_ENV === 'production') {
