@@ -86,7 +86,7 @@ const generateTimetableAPI = (preferences) => {
       let one = [];
       for (let lab in courseDetails.LABS) {
         one.push(lab);
-        particular.push(one);
+        particular.push([...one]);
         one.pop();
       }
     }
@@ -410,13 +410,23 @@ const generateTimetableAPI = (preferences) => {
           obj[key] = updatedCourseDetails.LABS[key];
           return obj;
         }, {});
-
+      if (
+        (Object.keys(courseDetails.LECTURES).length > 0 &&
+          Object.keys(updatedCourseDetails.LECTURES).length === 0) ||
+        (Object.keys(courseDetails.TUTORIALS).length > 0 &&
+          Object.keys(updatedCourseDetails.TUTORIALS).length === 0) ||
+        (Object.keys(courseDetails.LABS).length > 0 &&
+          Object.keys(updatedCourseDetails.LABS).length === 0)
+      ) {
+        fail = true;
+      }
       updatedCourseDetails.SECTIONS = {
         ...updatedCourseDetails.LECTURES,
         ...updatedCourseDetails.TUTORIALS,
         ...updatedCourseDetails.LABS,
       };
       const combinations = generatePermutations(updatedCourseDetails);
+
       courseCombinations.push(combinations);
     }
   }
@@ -436,42 +446,51 @@ const generateTimetableAPI = (preferences) => {
       0,
       TT
     );
-    return parsedTTs;
+  } else {
+    parsedTTs = new Parsed();
+    parsedTTs.scheduledCourses = [];
   }
+  return parsedTTs;
 };
 // generateTimetableAPI([
 //   {
-//     "BITS F311": {
-//       PREFERRED: { LECTURES: ["L1"], TUTORIALS: [], LABS: [] },
-//       UNPREFERRED: { LECTURES: [], TUTORIALS: [], LABS: [] },
-//     },
-//   },
-//   {
-//     "BITS F312": {
-//       PREFERRED: { LECTURES: ["L1"], TUTORIALS: [], LABS: [] },
-//       UNPREFERRED: { LECTURES: [], TUTORIALS: [], LABS: [] },
-//     },
-//   },
-//   {
-//     "CS F303": {
+//     "CS F212": {
 //       PREFERRED: { LECTURES: [], TUTORIALS: [], LABS: [] },
-//       UNPREFERRED: { LECTURES: [], TUTORIALS: [], LABS: ["P1"] },
+//       UNPREFERRED: { LECTURES: ["L1"], TUTORIALS: [], LABS: [] },
 //     },
 //   },
 //   {
-//     "CS F363": {
-//       PREFERRED: { LECTURES: ["L1"], TUTORIALS: [], LABS: [] },
+//     "CS F241": {
+//       PREFERRED: { LECTURES: [], TUTORIALS: [], LABS: [] },
 //       UNPREFERRED: { LECTURES: [], TUTORIALS: [], LABS: [] },
 //     },
 //   },
 //   {
-//     "CS F364": {
-//       PREFERRED: { LECTURES: ["L1"], TUTORIALS: [], LABS: [] },
-//       UNPREFERRED: { LECTURES: [], TUTORIALS: ["T1", "T2"], LABS: [] },
+//     "ECON F315": {
+//       PREFERRED: { LECTURES: [], TUTORIALS: [], LABS: [] },
+//       UNPREFERRED: { LECTURES: [], TUTORIALS: [], LABS: [] },
 //     },
 //   },
 //   {
-//     "CS F372": {
+//     "ECON F341": {
+//       PREFERRED: { LECTURES: [], TUTORIALS: [], LABS: [] },
+//       UNPREFERRED: { LECTURES: [], TUTORIALS: [], LABS: [] },
+//     },
+//   },
+//   {
+//     "ECON F342": {
+//       PREFERRED: { LECTURES: [], TUTORIALS: [], LABS: [] },
+//       UNPREFERRED: { LECTURES: [], TUTORIALS: [], LABS: [] },
+//     },
+//   },
+//   {
+//     "ECON F343": {
+//       PREFERRED: { LECTURES: [], TUTORIALS: [], LABS: [] },
+//       UNPREFERRED: { LECTURES: [], TUTORIALS: [], LABS: [] },
+//     },
+//   },
+//   {
+//     "CS F211": {
 //       PREFERRED: { LECTURES: [], TUTORIALS: [], LABS: [] },
 //       UNPREFERRED: { LECTURES: [], TUTORIALS: [], LABS: [] },
 //     },
