@@ -25,7 +25,7 @@
 					</div>
 					<div v-else>
 						<p class="text-subtitle-1 font-weight-medium text-center mb-1">
-							Total {{ totalCourseUnits }} units taken
+							Total Units: {{ totalCourseUnits }}
 						</p>
 						<div class="cards-block">
 							<v-card

@@ -194,9 +194,9 @@
 								<v-sheet height="64">
 									<v-toolbar flat>
 										<v-toolbar-title v-if="$refs.calendar" v-show="generatedTimetables.length > 0">
-											<span class="ml-2">{{ $refs.calendar.title }} </span>
+											<small> Total Units: {{ totalUnitsForGenerateTT }} </small>
 											<small class="ml-2">
-												( Total {{ generatedTimetables.length }} possibilities found )
+												( Total timetables generated: {{ generatedTimetables.length }} )
 											</small>
 											<small class="ml-2 primary--text">
 												[ Timetable {{ currentTimetableIndex }} ]
@@ -427,6 +427,7 @@ export default {
 		showExportedShareIdAlert: false,
 		currentExportedId: '',
 		pdfDownloading: false,
+		totalUnitsForGenerateTT: 0,
 	}),
 	computed: {
 		...mapGetters(['getUserCoursesWithTag']),
@@ -637,6 +638,11 @@ export default {
 				this.generating = false;
 				const [f_date, l_date] = this.getWeekDaysBasedOnToday();
 				this.updateRange({ start: f_date, end: l_date });
+
+				// total units
+				let unitsCount = 0;
+				this.courseDetailsArr.forEach((cc) => (unitsCount += cc.units));
+				this.totalUnitsForGenerateTT = unitsCount;
 			} catch (err) {
 				console.error(err);
 			}
