@@ -39,9 +39,9 @@
 
 ---
 
-### Acknowedgement
+## Credits
 
-- Design idea is inspired by [StudyDeck by SUTT](https://studydeck.bits-sutechteam.org/)
+## The design is heavily inspired from [StudyDeck](https://studydeck.bits-sutechteam.org/) Web App. [Students' Union Technical Team, BITS Pilani](http://bits-sutechteam.org/) is the original owner and creator of these designs.
 
 ---
 
