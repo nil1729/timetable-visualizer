@@ -9,7 +9,10 @@ const generateTimetableAPI = require('../../../timetable-generator/generator');
 router.post('/generate-timetable', async (req, res) => {
 	try {
 		let { scheduledCourses } = await generateTimetableAPI(req.body);
-		const browser = await puppeteer.launch();
+		const browser = await puppeteer.launch({
+			headless: true,
+			args: ['--no-sandbox'],
+		});
 		const page = await browser.newPage();
 		const pageHTML = setUpTimetableTemplate(scheduledCourses);
 		await page.setContent(pageHTML);
@@ -22,6 +25,7 @@ router.post('/generate-timetable', async (req, res) => {
 		res.set('Content-Type', 'application/pdf');
 		res.send(pdfBuffer);
 	} catch (error) {
+		console.log(error);
 		return res.status(400).json({ error: error.message });
 	}
 });
