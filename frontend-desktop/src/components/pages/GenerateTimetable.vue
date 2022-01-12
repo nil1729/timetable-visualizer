@@ -13,7 +13,9 @@
 				</div>
 				<div style="margin: auto" v-else-if="courseDetailsArr.length === 0">
 					<v-img contain src="@/assets/empty.png"></v-img>
-					<p class="text-overline text-center">Your Course Collection is Empty</p>
+					<p class="text-center" style="color: #80828b; font-size: 20px">
+						Once you add courses, they show up here!
+					</p>
 				</div>
 				<div class="my-container" v-else>
 					<v-card
@@ -248,9 +250,7 @@
 										src="@/assets/404-generated.svg"
 									></v-img>
 									<p class="text-center body-1 mt-3">
-										{{
-											'We did not found any timetable based on the given preferences !!'.toUpperCase()
-										}}
+										{{ "We couldn't generate any timetable based on the given preferences :(" }}
 									</p>
 								</div>
 								<v-sheet id="my-main-timetable-box" v-show="generatedTimetables.length > 0">

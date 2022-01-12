@@ -19,7 +19,9 @@
 						<v-container>
 							<v-row justify="center">
 								<v-img contain src="@/assets/empty.png"></v-img>
-								<p class="text-overline text-center">Your Course Collection is Empty</p>
+								<p class="text-center" style="color: #80828b">
+									Once you add courses, they show up here!
+								</p>
 							</v-row>
 						</v-container>
 					</div>

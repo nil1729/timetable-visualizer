@@ -5,7 +5,7 @@
 				<v-toolbar flat dense color="info" dark>
 					<v-toolbar-title class="ma-auto">
 						<span class="text-centre text-overline">
-							Share Timetable with your peeps
+							Share Timetable with your friends
 							<v-icon>mdi-account-group-outline</v-icon>
 						</span>
 					</v-toolbar-title>
@@ -578,15 +578,22 @@ export default {
 
 		async exportMyTimetable() {
 			try {
-				this.exportingMyTimetable = true;
-				const { shareID } = await this.$store.dispatch('sendRequest', {
-					method: 'POST',
-					url: `timetable/export`,
-					requestBody: this.exportTimetable.scheduledCourses,
-				});
-				this.exportTimetable.shareID = shareID;
-				this.exportingMyTimetable = false;
-				this.myTimetableExported = true;
+				if (this.exportTimetable?.scheduledCourses?.length > 0) {
+					this.exportingMyTimetable = true;
+					const { shareID } = await this.$store.dispatch('sendRequest', {
+						method: 'POST',
+						url: `timetable/export`,
+						requestBody: this.exportTimetable.scheduledCourses,
+					});
+					this.exportTimetable.shareID = shareID;
+					this.exportingMyTimetable = false;
+					this.myTimetableExported = true;
+				} else {
+					this.$store.commit('ADD_NOTIFICATION', {
+						message: _.upperCase('please create a timetable to export'),
+						type: 'warning',
+					});
+				}
 			} catch (e) {
 				console.log(e);
 			}
