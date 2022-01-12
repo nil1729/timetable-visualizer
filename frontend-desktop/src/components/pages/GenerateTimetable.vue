@@ -326,6 +326,8 @@
 			</v-container>
 		</div>
 		<my-show-screenshot ref="myScreenshotViewer" @confirmQuery="saveScreenshot" />
+		<my-generate-pdf-dialog ref="confirmationDialogForPDF" @confirmQuery="confirmationSubmit" />
+
 		<v-overlay :value="exportingCurrentTimetable">
 			<v-progress-circular indeterminate size="64"></v-progress-circular>
 		</v-overlay>
@@ -341,7 +343,7 @@
 			<v-tooltip left>
 				<template v-slot:activator="{ on, attrs }">
 					<v-btn
-						@click="downloadPDF"
+						@click="openDialogForDownloadPDF"
 						v-show="isGenerated && generatedTimetables.length > 0"
 						color="info"
 						fixed
@@ -368,11 +370,13 @@ import html2canvas from 'html2canvas';
 import moment from 'moment';
 import { mapGetters } from 'vuex';
 import ShowScreenshots from '@/components/layouts/ShowScreenshot.vue';
+import GeneratePageDownloadConfirm from '@/components/layouts/GeneratePageDownloadConfirm.vue';
 
 export default {
 	name: 'generate-timetable',
 	components: {
 		'my-show-screenshot': ShowScreenshots,
+		'my-generate-pdf-dialog': GeneratePageDownloadConfirm,
 	},
 	data: () => ({
 		skeletonAttrs: {
@@ -460,6 +464,15 @@ export default {
 		},
 	},
 	methods: {
+		openDialogForDownloadPDF() {
+			this.$refs.confirmationDialogForPDF.showDialog();
+		},
+		confirmationSubmit({ chosenOption }) {
+			if (chosenOption) {
+				this.downloadPDF();
+			}
+			this.$refs.confirmationDialogForPDF.hideDialog();
+		},
 		removeCourseLocally(courseCode) {
 			this.courseDetailsArr = this.courseDetailsArr.filter((it) => it.courseCode !== courseCode);
 		},

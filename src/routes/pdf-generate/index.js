@@ -18,7 +18,7 @@ router.post('/generate-timetable', async (req, res) => {
 		const pageHTML = setUpTimetableTemplate(timetableArray);
 		await page.setContent(pageHTML);
 
-		const pdfBuffer = await page.pdf({ format: 'A4', landscape: true });
+		const pdfBuffer = await page.pdf({ format: 'A4', landscape: true, timeout: 5 * 60 * 1000 });
 
 		await page.close();
 		await browser.close();

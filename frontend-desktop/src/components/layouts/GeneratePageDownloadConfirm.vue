@@ -1,11 +1,13 @@
 <template>
 	<v-dialog v-model="dialog" persistent max-width="800" width="fit-content">
-		<v-card v-if="currentCourse">
-			<v-card-title class="text-overline">
-				Are you sure to remove {{ currentCourse.courseName }} ({{ currentCourse.courseCode }})
+		<v-card>
+			<v-card-title class="text-body-1">
+				PDF generation may take some time to complete
 			</v-card-title>
 			<v-card-text>
-				<div class="text-body-1">This course currently scheduled on your Timetable Visualizer</div>
+				<div class="text-body-1">
+					Do you want to continue? (Only first 100 timetables will be printed)
+				</div>
 			</v-card-text>
 			<v-card-actions>
 				<v-spacer></v-spacer>
@@ -21,22 +23,19 @@ export default {
 	data() {
 		return {
 			dialog: false,
-			currentCourse: null,
 		};
 	},
 	methods: {
-		showDialog(course) {
+		showDialog() {
 			this.dialog = true;
-			this.currentCourse = course;
 		},
 
 		hideDialog() {
 			this.dialog = false;
-			this.currentCourse = null;
 		},
 
 		confirmQuery(chosenOption) {
-			this.$emit('confirmQuery', { chosenOption, courseID: this.currentCourse.courseCode });
+			this.$emit('confirmQuery', { chosenOption });
 		},
 	},
 };
