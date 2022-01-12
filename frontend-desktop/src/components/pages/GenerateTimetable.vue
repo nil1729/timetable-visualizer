@@ -21,6 +21,20 @@
 						:key="currentCourse.courseCode"
 						class="my-generate-course-card"
 					>
+						<v-tooltip right>
+							<template v-slot:activator="{ on, attrs }">
+								<v-icon
+									class="my-generate-remove-icon"
+									color="error"
+									v-bind="attrs"
+									v-on="on"
+									@click="removeCourseLocally(currentCourse.courseCode)"
+								>
+									mdi-delete-outline
+								</v-icon>
+							</template>
+							<span>Remove Course</span>
+						</v-tooltip>
 						<v-card-title class="text-body-1 pb-1">
 							<v-icon left color="primary" small> mdi-bookmark-multiple </v-icon>
 							<span>{{ currentCourse.courseCode }}</span>
@@ -445,6 +459,9 @@ export default {
 		},
 	},
 	methods: {
+		removeCourseLocally(courseCode) {
+			this.courseDetailsArr = this.courseDetailsArr.filter((it) => it.courseCode !== courseCode);
+		},
 		async downloadPDF() {
 			try {
 				this.pdfDownloading = true;
@@ -902,5 +919,11 @@ export default {
 .my-404-generated {
 	display: flex;
 	flex-direction: column;
+}
+.my-generate-remove-icon {
+	position: absolute;
+	right: 3%;
+	top: 3%;
+	cursor: pointer;
 }
 </style>

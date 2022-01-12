@@ -1,6 +1,6 @@
 <template>
 	<v-app id="inspire">
-		<v-navigation-drawer v-model="drawer" :mini-variant.sync="mini" permanent app>
+		<v-navigation-drawer v-model="drawer" :mini-variant.sync="mini" permanent expand-on-hover app>
 			<v-list-item class="px-2">
 				<v-list-item-avatar>
 					<img src="@/assets/bits-logo.png" alt="John" />
