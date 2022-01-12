@@ -34,7 +34,7 @@ if (process.env.NODE_ENV === 'production') {
 		if (DeviceHelper.isDesktop(req.deviceInfo)) {
 			res.sendFile(__dirname + '/prod/desktop/index.html');
 		} else {
-			res.send('<h3>Work in Progress for Mobile Devices</h3>');
+			res.sendFile(__dirname + '/frontend-mobile/index.html');
 		}
 	});
 }
