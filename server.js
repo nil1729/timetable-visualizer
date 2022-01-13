@@ -22,7 +22,7 @@ const middlewareDetect = (req, res, next) => {
 };
 
 app.use(express.json());
-app.use(morgan('dev'));
+app.use(morgan('combined'));
 app.use('/api/v1/courses', courseRoutes);
 app.use('/api/v1/timetable', timetableRoutes);
 app.use('/api/v1/feedback', require('./src/routes/feedback'));
