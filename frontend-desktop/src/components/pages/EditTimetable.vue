@@ -499,7 +499,7 @@ export default {
 
 		async removeSection(event) {
 			const requestedCourse = this.getUserCoursesWithTag.find(
-				(course) => course._id === event.courseID
+				(course) => course.courseCode === event.courseID
 			);
 
 			await this.$store.dispatch('removeSectionFromSchedule', {
