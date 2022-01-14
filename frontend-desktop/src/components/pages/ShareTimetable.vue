@@ -564,7 +564,7 @@ export default {
 
 		async saveScreenshot({ choosenOption, imageData }) {
 			if (choosenOption) {
-				this.downloadURI(imageData, 'timtable-schedule.png');
+				this.downloadURI(imageData, 'timetable-schedule.png');
 			}
 			this.$refs.myScreenshotViewer.hideDialog();
 		},
