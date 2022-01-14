@@ -112,7 +112,7 @@
       .timetable .time-interval {
         grid-area: time;
         display: grid;
-        grid-template-rows: repeat(10, 1fr);
+        grid-template-rows: repeat(11, 1fr);
         font-size: 14px;
       }
       .timetable .time-interval > div {
@@ -127,7 +127,7 @@
       .timetable .content {
         grid-area: content;
         display: grid;
-        grid-template-rows: repeat(10, 1fr);
+        grid-template-rows: repeat(11, 1fr);
         grid-template-columns: repeat(6, 1fr);
       }
       .timetable .content > div {
@@ -178,6 +178,7 @@
         <div>3:00 - 4:00</div>
         <div>4:00 - 5:00</div>
         <div>5:00 - 6:00</div>
+        <div>6:00 - 7:00</div>
       </div>
       <div class="content">
         <%TT.forEach((course1)=>{%> <%course1.forEach((course)=>{%>

@@ -56,7 +56,7 @@
                 Total {{ pagination.totalCourses }} Courses Found
                 <br />
                 <small class="warning--text"
-                  >Last Updated at: January 13<sup>th</sup>, 2022</small
+                  >Last Updated on: January 14<sup>th</sup>, 2022</small
                 >
               </div>
             </v-col>
