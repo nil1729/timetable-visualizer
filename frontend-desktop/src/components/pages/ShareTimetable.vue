@@ -99,7 +99,6 @@
 														@click:event="showEvent"
 														@change="updateRange"
 														:interval-height="60"
-														:interval-style="intervalStyle"
 													>
 														<template v-slot:event="{ event }">
 															<div class="pl-1 m-0 black--text">
@@ -211,7 +210,6 @@
 														@click:event="showEvent"
 														@change="updateRange"
 														:interval-height="60"
-														:interval-style="intervalStyle"
 													>
 														<template v-slot:event="{ event }">
 															<div class="pl-1 m-0 black--text">
@@ -378,12 +376,6 @@ export default {
 	},
 
 	methods: {
-		intervalStyle() {
-			return {
-				width: '155px',
-			};
-		},
-
 		editSchedule(courseID) {
 			this.$router.push({
 				name: 'EditTimetable',
