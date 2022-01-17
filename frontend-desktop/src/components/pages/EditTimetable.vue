@@ -296,12 +296,12 @@ export default {
 	},
 
 	watch: {
-		getScheduledCourses: function (newVal) {
+		getScheduledCourses: function(newVal) {
 			let daysArr = this.getDaysArray(this.startTimestamp.date, this.endTimestamp.date);
 			this.setCalenderSlots(daysArr, newVal);
 			this.setUpPagination('last_page');
 		},
-		getUserCoursesWithTag: function (newVal) {
+		getUserCoursesWithTag: function(newVal) {
 			let courseUnitsCount = 0;
 			newVal.forEach((it) => (courseUnitsCount += it.units));
 			this.totalCourseUnits = courseUnitsCount;
@@ -493,7 +493,9 @@ export default {
 		},
 
 		editSchedule(courseID) {
-			const requestedCourse = this.getUserCoursesWithTag.find((course) => course._id === courseID);
+			const requestedCourse = this.getUserCoursesWithTag.find(
+				(course) => course.courseCode === courseID
+			);
 			this.showCourseInfo(requestedCourse);
 		},
 
