@@ -27,6 +27,32 @@
 									<v-btn
 										outlined
 										tile
+										color="success"
+										depressed
+										class="mr-5"
+										@click="openModalForICS"
+										:disabled="icsGeneration.isGenerating"
+									>
+										<v-icon left v-if="!icsGeneration.isGenerating">
+											mdi-calendar-check-outline
+										</v-icon>
+										<v-icon left v-if="icsGeneration.generateType === 'download'">
+											mdi-hammer-wrench
+										</v-icon>
+										<v-icon left v-if="icsGeneration.generateType === 'email'">
+											mdi-email-send-outline
+										</v-icon>
+										{{
+											!icsGeneration.isGenerating
+												? 'add to calendar'
+												: icsGeneration.generateType === 'download'
+												? 'Generating ...'
+												: 'Sending Email ...'
+										}}
+									</v-btn>
+									<v-btn
+										outlined
+										tile
 										color="primary"
 										depressed
 										class="mr-5"
@@ -122,6 +148,7 @@
 			</v-row>
 		</v-container>
 		<my-show-screenshot ref="myScreenshotViewer" @confirmQuery="saveScreenshot" />
+		<my-ics-modal ref="myModalForICS" @confirmQueryForICS="generateICS" />
 	</div>
 </template>
 
@@ -131,11 +158,13 @@ import moment from 'moment';
 import { mapGetters } from 'vuex';
 import html2canvas from 'html2canvas';
 import ShowScreenshots from '@/components/layouts/ShowScreenshot.vue';
+import ModalForICS from '@/components/layouts/ModalForICS.vue';
 
 export default {
 	name: 'view-timetable',
 	components: {
 		'my-show-screenshot': ShowScreenshots,
+		'my-ics-modal': ModalForICS,
 	},
 	data: () => ({
 		timetableLoading: false,
@@ -170,6 +199,10 @@ export default {
 			4: 'Th',
 			5: 'F',
 			6: 'S',
+		},
+		icsGeneration: {
+			generateType: null,
+			isGenerating: false,
 		},
 	}),
 
@@ -232,7 +265,6 @@ export default {
 		setCalenderSlots(daysArr) {
 			let events = [];
 			let courses = this.getScheduledCourses;
-			console.log(courses);
 
 			for (let j = 0; j < daysArr.length; j++) {
 				let curDt = daysArr[j];
@@ -320,6 +352,63 @@ export default {
 			link.download = name;
 			link.href = uri;
 			link.click();
+		},
+
+		openModalForICS() {
+			if (_.isArray(this.getScheduledCourses) && this.getScheduledCourses.length > 0) {
+				this.$refs.myModalForICS.showDialog();
+			} else {
+				this.$store.commit('ADD_NOTIFICATION', {
+					message: _.upperCase('please schedule your courses first'),
+					type: 'warning',
+				});
+			}
+		},
+
+		async generateICS({ chosenOption, userEmail }) {
+			try {
+				this.icsGeneration.generateType = chosenOption;
+				this.icsGeneration.isGenerating = true;
+				this.$refs.myModalForICS.hideDialog();
+				const myScheduledCourses = this.getScheduledCourses;
+				const resp = await fetch('/api/v1/timetable/generate/ics-file', {
+					headers: {
+						Accept: 'application/json',
+						'Content-Type': 'application/json',
+					},
+					method: 'POST',
+					body: JSON.stringify({
+						scheduledCourses: myScheduledCourses,
+						userChoice: chosenOption,
+						userEmail,
+					}),
+				});
+				if (chosenOption === 'download') {
+					const myFile = await resp.blob();
+					this.saveFileToLocal(myFile);
+				} else {
+					const data = await resp.json();
+					this.$store.commit('ADD_NOTIFICATION', {
+						message: _.upperCase(data.message),
+						type: 'success',
+					});
+				}
+				this.icsGeneration.generateType = null;
+				this.icsGeneration.isGenerating = false;
+			} catch (e) {
+				console.log(e);
+			}
+		},
+
+		async saveFileToLocal(fileObj) {
+			var a = document.createElement('a');
+			document.body.appendChild(a);
+			a.style = 'display: none';
+			const url = window.URL.createObjectURL(fileObj);
+			a.href = url;
+			a.download = `timetable-schedule.ics`;
+			a.click();
+			window.URL.revokeObjectURL(url);
 		},
 	},
 };

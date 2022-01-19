@@ -61,7 +61,10 @@ const generateICS = (scheduledCourses, filename) => {
   };
   generateICS(scheduledCourses);
   strResult += "END:VCALENDAR";
-  fs.writeFileSync(path.join(__dirname, `../tmp/${filename}.ics`), strResult);
+  return fs.writeFileSync(
+    path.join(__dirname, `../tmp/${filename}.ics`),
+    strResult
+  );
 
   function generateDescription(instructors) {
     let description = "";

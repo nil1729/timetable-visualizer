@@ -6,6 +6,10 @@ const _ = require('lodash');
 const { isValidObjectId } = require('mongoose');
 const randomstring = require('randomstring');
 const generateTimetableAPI = require('../../timetable-generator/generator');
+const generateFileICS = require('../../timetable-generator/generateICS');
+const nodemailer = require('nodemailer');
+const fs = require('fs');
+const path = require('path');
 
 /**
  *
@@ -120,13 +124,91 @@ const createShareID = async () => {
 	}
 };
 
-// Generate Timetable
+/**
+ *
+ * @route /api/v1/timetable/generate-timetable
+ *
+ */
 router.post('/generate-timetable', async (req, res, next) => {
 	try {
 		let result = await generateTimetableAPI(req.body);
 		return res.json(result);
 	} catch (e) {
 		console.log(e);
+	}
+});
+
+/**
+ *
+ * @route /api/v1/timetable/generate/ics-file
+ *
+ */
+router.post('/generate/ics-file', async (req, res, next) => {
+	try {
+		const { scheduledCourses, userChoice, userEmail } = req.body;
+
+		if (!['download', 'email'].includes(userChoice))
+			throw new Error('Please choose a valid type to send ics file to you');
+
+		if (!Array.isArray(scheduledCourses) && scheduledCourses.length === 0)
+			throw new Error('Invalid Timetable');
+
+		const fileName = randomstring.generate({ length: 20, charset: 'alphanumeric' });
+		generateFileICS(scheduledCourses, fileName);
+
+		if (userChoice === 'email') {
+			const output = `
+				<p>Please find attached the .ics file for your timetable. Open the .ics file using your phone to directly import the file onto Google Calendar.</p>
+				<p>
+					Best Regards,
+					<br/>
+					Timetable Companion Team
+				</p>
+			`;
+
+			let transporter = nodemailer.createTransport({
+				service: 'gmail',
+				auth: {
+					user: process.env.SENDER_MAIL,
+					pass: process.env.SENDER_MAIL_PASSWORD,
+				},
+			});
+
+			let mailOptions = {
+				from: `Timetable Companion <${process.env.SENDER_MAIL}>`,
+				to: userEmail,
+				subject: 'Your Timetable Schedule',
+				html: output,
+				attachments: [
+					{
+						filename: 'timetable-schedule.ics',
+						path: path.join(__dirname, `../../tmp/${fileName}.ics`),
+					},
+				],
+			};
+
+			const response = await transporter.sendMail(mailOptions);
+
+			// Email Logs for further development if encounter any bug on production
+			const mailLogsArr = fs.existsSync(process.env.MAIL_LOG_FILE)
+				? JSON.parse(fs.readFileSync(process.env.MAIL_LOG_FILE).toString())
+				: [];
+			mailLogsArr.push(response);
+			fs.writeFileSync(process.env.MAIL_LOG_FILE, JSON.stringify(mailLogsArr));
+
+			res.status(200).json({
+				success: true,
+				message: 'Email sent successfully',
+			});
+		} else {
+			const icsBuffer = fs.readFileSync(`tmp/${fileName}.ics`);
+			res.set('Content-Type', 'text/calendar');
+			res.send(icsBuffer);
+		}
+		fs.unlinkSync(`tmp/${fileName}.ics`);
+		return;
+	} catch (e) {
+		return res.status(400).json({ error: error.message });
 	}
 });
 
