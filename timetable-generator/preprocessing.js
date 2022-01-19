@@ -11,6 +11,7 @@ timetable.forEach((element) => {
     courses.push({
       COURSE_TITLE: element["COURSE TITLE"],
       COURSE_NUMBER: element["COURSE NO."],
+      ROOM: element["ROOM"],
     });
   }
 });
@@ -66,6 +67,7 @@ const commonFunc = (curSection, timetable, i, type, type1) => {
   type[curSection].instructors.push(
     timetable[i]["INSTRUCTOR-IN-CHARGE/Instructor"]
   );
+  type[curSection].room = timetable[i]["ROOM"];
   type[curSection].timingString = timetable[i]["DAYS AND HOURS"];
   type1[curSection] = {};
   type1[curSection].instructors = [];
@@ -73,7 +75,7 @@ const commonFunc = (curSection, timetable, i, type, type1) => {
     timetable[i]["INSTRUCTOR-IN-CHARGE/Instructor"]
   );
   type1[curSection].timingString = timetable[i]["DAYS AND HOURS"];
-
+  type1[curSection].room = timetable[i]["ROOM"];
   const timings = timetable[i]["DAYS AND HOURS"].split(" ").filter((e) => {
     if (e.trim().length !== 0) {
       return e;
@@ -146,12 +148,14 @@ const commonFunc = (curSection, timetable, i, type, type1) => {
       timetable[i]["INSTRUCTOR-IN-CHARGE/Instructor"]
     );
     type[curSec].timingString = timetable[i]["DAYS AND HOURS"];
+    type[curSec].room = timetable[i]["ROOM"];
     type1[curSec] = {};
     type1[curSec].instructors = [];
     type1[curSec].instructors.push(
       timetable[i]["INSTRUCTOR-IN-CHARGE/Instructor"]
     );
     type1[curSec].timingString = timetable[i]["DAYS AND HOURS"];
+    type1[curSec].room = timetable[i]["ROOM"];
     const timings = timetable[i]["DAYS AND HOURS"].split(" ").filter((e) => {
       if (e.trim().length !== 0) {
         return e;
