@@ -76,7 +76,7 @@ const generateICS = (scheduledCourses, filename) => {
     var days = { su: 0, m: 1, t: 2, w: 3, th: 4, f: 5, s: 6 };
     var day = days[dayName.toLowerCase().substr(0, 3)];
     var current = new Date(start);
-    current.setDate(current.getDate() + 1 + ((day - current.getDay() + 7) % 7));
+    current.setDate(current.getDate() + ((day - current.getDay() + 7) % 7));
     result.push(new Date(+current));
     return result;
   }
