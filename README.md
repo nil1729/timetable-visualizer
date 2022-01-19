@@ -15,6 +15,12 @@
 
 ### Updates:
 
+- **2022-01-14**
+
+  - Timetable Generator Added (Developed by [Shaurya](https://github.com/spidy102))
+  - PDF Downloader for all generated timetables
+  - Some UI bugs fixed
+
 - **2021-08-04**
   - New Timetable (Acc. to August 4th)
   - _New Section_ tag on each sections for New Admissions
@@ -32,7 +38,7 @@
 
 ### Website Demo
 
-- Visit Here for more information: [https://bits-timetable.herokuapp.com](https://bits-timetable.herokuapp.com/)
+- Visit Here for more information: [https://timetable-companion.tech](https://timetable-companion.tech)
   <br>
 
 ![sample](./sample.jpeg)
@@ -41,8 +47,8 @@
 
 ## Credits
 
-## The design is heavily inspired from [StudyDeck](https://studydeck.bits-sutechteam.org/) Web App. [Students' Union Technical Team, BITS Pilani](http://bits-sutechteam.org/) is the original owner and creator of these designs.
+- The Design idea is adapted from [StudyDeck](https://studydeck.bits-sutechteam.org/) Web Application.
 
 ---
 
-<p style="text-align: center;">Made With<span style="color: red;"> &#10084; </span>by <a href="https://github.com/nil1729" target="_blank"> Nilanjan Deb </a> </p>
+Made With <span style="color: red;"> &#10084; </span>by [Nil Deb](https://github.com/nil179) & [Shaurya](https://github.com/spidy102)

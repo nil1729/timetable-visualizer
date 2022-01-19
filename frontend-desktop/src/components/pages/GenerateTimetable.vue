@@ -749,6 +749,7 @@ export default {
 		},
 
 		setCalenderSlots(daysArr) {
+			this.events = [];
 			let events = [];
 			let courses = this.isGenerated
 				? this.generatedTimetables[this.currentTimetableIndex - 1]
@@ -790,6 +791,7 @@ export default {
 					title: `${course.courseName}`,
 					details: `
 						<div class='black--text'>
+							<h4>Course Code:  ${course.courseCode}</h4>
 							<h4>${this.typesMapper[type]} Section - ${currSlot.section}</h4>
 							<h4>Instructor(s)</h4>
 							<ul>

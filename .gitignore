@@ -3,4 +3,8 @@ node_modules
 prod
 package-lock.json
 feedback.txt
+<<<<<<< HEAD
 tmp
+=======
+mail-log.json
+>>>>>>> cda5bc7b067d74dcb51e84faaa8ed258998e14a2
