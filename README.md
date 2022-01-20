@@ -15,6 +15,12 @@
 
 ### Updates:
 
+- **2022-01-20**
+
+  - Add to Calendar Feature by importing `.ics` file (Developed by [Shaurya](https://github.com/spidy102))
+  - Sending email with `.ics` file as an attachment.
+  - Course Title View on Calendar UI
+
 - **2022-01-14**
 
   - Timetable Generator Added (Developed by [Shaurya](https://github.com/spidy102))
@@ -22,14 +28,20 @@
   - Some UI bugs fixed
 
 - **2021-08-04**
+
   - New Timetable (Acc. to August 4th)
   - _New Section_ tag on each sections for New Admissions
+
 - **2021-07-24**
+
   - Sharing Timetable Feature
   - Feedback System
+
 - **2021-07-22**
+
   - Notification Bug fixed
   - Improve the calender event feature
+
 - **2021-07-21**
   - Dark Theme Implemented
   - Some UI issues fixed
@@ -41,7 +53,7 @@
 - Visit Here for more information: [https://timetable-companion.tech](https://timetable-companion.tech)
   <br>
 
-![sample](./sample.jpeg)
+![sample](./sample.png)
 
 ---
 

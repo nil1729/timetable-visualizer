@@ -268,12 +268,17 @@
 										:weekday-format="formatDayString"
 										@click:event="showEvent"
 										@change="updateRange"
+										:interval-height="60"
 									>
-										<template v-slot:event="{ event, timeSummary }">
+										<template v-slot:event="{ event }">
 											<div class="pl-1 m-0 black--text">
 												<strong>{{ event.name }}</strong>
 												<br />
-												{{ timeSummary() }}
+												{{
+													event.title.length > 18 ? event.title.slice(0, 18) + '...' : event.title
+												}}
+												<br />
+												{{ event.manualTimeSummary }}
 											</div>
 										</template>
 									</v-calendar>
@@ -432,6 +437,20 @@ export default {
 		currentExportedId: '',
 		pdfDownloading: false,
 		totalUnitsForGenerateTT: 0,
+		endTimeMapper: {
+			'08:50': '09:00',
+			'09:50': '10:00',
+			'10:50': '11:00',
+			'11:50': '12:00',
+			'12:50': '13:00',
+			'13:50': '14:00',
+			'14:50': '15:00',
+			'15:50': '16:00',
+			'16:50': '17:00',
+			'17:50': '18:00',
+			'18:50': '19:00',
+			'19:50': '20:00',
+		},
 	}),
 	computed: {
 		...mapGetters(['getUserCoursesWithTag']),
@@ -779,8 +798,9 @@ export default {
 			if (hasClass >= 0) {
 				let classHour = timings[hasClass].time;
 				let [s, e] = classHour.split(' - ');
+				const modifiedEndTime = this.endTimeMapper[e];
 				let startEvent = `${date.toISOString().substr(0, 10)} ${s}`;
-				let endEvent = `${date.toISOString().substr(0, 10)} ${e}`;
+				let endEvent = `${date.toISOString().substr(0, 10)} ${modifiedEndTime}`;
 				let instructorsList = ``;
 				currSlot.instructors.forEach((it) => (instructorsList += `<li>${it}</li>`));
 				let evData = {
@@ -788,6 +808,7 @@ export default {
 					end: endEvent,
 					color: this.colorsMapper[type],
 					name: `${course.courseCode} - ${currSlot.section}`,
+					manualTimeSummary: `${s.split(':')[0]} - ${e}`,
 					title: `${course.courseName}`,
 					details: `
 						<div class='black--text'>
