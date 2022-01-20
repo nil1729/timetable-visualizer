@@ -3,3 +3,6 @@ node_modules
 prod
 package-lock.json
 feedback.txt
+tmp
+mail-log.json
+.DS_Store

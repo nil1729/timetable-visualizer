@@ -7,10 +7,6 @@
 				</v-list-item-avatar>
 
 				<v-list-item-title>BITS Student</v-list-item-title>
-
-				<v-btn icon @click.stop="mini = !mini">
-					<v-icon>mdi-chevron-left</v-icon>
-				</v-btn>
 			</v-list-item>
 
 			<v-divider></v-divider>
@@ -161,7 +157,7 @@ export default {
 		},
 	},
 	watch: {
-		$route: function (newVal) {
+		$route: function(newVal) {
 			this.selectedMenuTab = this.items.findIndex((item) => `/${item.page}` === newVal.path);
 		},
 	},
