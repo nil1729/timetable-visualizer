@@ -99,7 +99,7 @@
 												</div>
 											</div>
 										</v-expansion-panel-header>
-										<v-expansion-panel-content class="pt-2">
+										<v-expansion-panel-content class="pt-2" style="position: relative">
 											<div>
 												<p class="text-body-2 mb-1 font-weight-medium">Timings:</p>
 												<p
@@ -118,6 +118,17 @@
 													:key="teacher"
 												>
 													{{ teacher }}
+												</p>
+											</div>
+											<div
+												class="room_number_div"
+												v-if="section.roomNumber && section.roomNumber.length > 0"
+											>
+												<p class="text-subtitle-2 primary--text">
+													<span class="font-weight-bold"> Room: </span>
+													<span>
+														{{ parseRoomNumberWithBuilding(section.roomNumber) }}
+													</span>
 												</p>
 											</div>
 										</v-expansion-panel-content>
@@ -249,6 +260,25 @@ export default {
 			timings.forEach((timing) => (desiredString += `${timing.dayCode}, `));
 			return desiredString.substring(0, desiredString.length - 2);
 		},
+
+		parseRoomNumberWithBuilding: () => (roomNumber) => {
+			let startNumber = Number(roomNumber[0]);
+
+			switch (startNumber) {
+				case 1:
+					return `${roomNumber} (FD I)`;
+				case 2:
+					return `${roomNumber} (FD II)`;
+				case 3:
+					return `${roomNumber} (FD III)`;
+				case 5:
+					return `${roomNumber} (LTC)`;
+				case 6:
+					return `${roomNumber} (NAB)`;
+				default:
+					break;
+			}
+		},
 	},
 };
 </script>
@@ -280,5 +310,11 @@ export default {
 	position: absolute;
 	right: 5px;
 	top: 5px;
+}
+.room_number_div {
+	position: absolute;
+	top: 10px;
+	right: 15px;
+	width: fit-content;
 }
 </style>

@@ -812,6 +812,7 @@ export default {
 					title: `${course.courseName}`,
 					details: `
 						<div class='black--text'>
+							${currSlot.roomNumber ? '<h4>Room Number:  ' + currSlot.roomNumber + '</h4>' : ''}
 							<h4>Course Code:  ${course.courseCode}</h4>
 							<h4>${this.typesMapper[type]} Section - ${currSlot.section}</h4>
 							<h4>Instructor(s)</h4>

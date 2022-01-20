@@ -112,13 +112,13 @@
 									@change="updateRange"
 									@click:more="viewDay"
 									@click:date="viewDay"
-									:interval-height="60"
+									:interval-height="65"
 								>
 									<template v-slot:event="{ event }">
 										<div class="pl-1 m-0 black--text">
 											<strong>{{ event.name }}</strong>
 											<br />
-											{{ event.title.length > 19 ? event.title.slice(0, 19) + '...' : event.title }}
+											{{ event.title.length > 21 ? event.title.slice(0, 21) + '...' : event.title }}
 											<br />
 											{{ event.manualTimeSummary }}
 										</div>
@@ -319,9 +319,12 @@ export default {
 					name: `${course.courseCode} - ${currSlot.section}`,
 					title: `${course.courseName}`,
 					courseID: course.courseCode,
-					manualTimeSummary: `${s.split(':')[0]} - ${e}`,
+					manualTimeSummary: `${s} - ${e} ${
+						currSlot.roomNumber ? '(' + currSlot.roomNumber + ')' : ''
+					}`,
 					details: `
 						<div class='black--text'>
+							${currSlot.roomNumber ? '<h4>Room Number:  ' + currSlot.roomNumber + '</h4>' : ''}
 							<h4>${this.typesMapper[type]} Section - ${currSlot.section}</h4>
 							<h4>Instructor(s)</h4>
 							<ul>

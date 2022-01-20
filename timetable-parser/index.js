@@ -142,6 +142,7 @@ for (let i = 0; i < totalCourses.length; i++) {
 
 			let section = currSec['SEC'],
 				time = currSec['DAYS & HOURS'],
+				roomNumber = currSec['ROOM'],
 				instructors = [];
 
 			lecArr.forEach((l) => instructors.push(l['INSTRUCTOR-IN-CHARGE /Instructor']));
@@ -151,6 +152,7 @@ for (let i = 0; i < totalCourses.length; i++) {
 				section,
 				time,
 				instructors,
+				roomNumber,
 			};
 		}
 
@@ -170,6 +172,7 @@ for (let i = 0; i < totalCourses.length; i++) {
 
 			let section = currSec['SEC'],
 				time = currSec['DAYS & HOURS'],
+				roomNumber = currSec['ROOM'],
 				instructors = [];
 
 			lecArr.forEach((l) => instructors.push(l['INSTRUCTOR-IN-CHARGE /Instructor']));
@@ -179,6 +182,7 @@ for (let i = 0; i < totalCourses.length; i++) {
 				section,
 				time,
 				instructors,
+				roomNumber,
 			};
 		}
 
@@ -198,6 +202,7 @@ for (let i = 0; i < totalCourses.length; i++) {
 
 			let section = currSec['SEC'],
 				time = currSec['DAYS & HOURS'],
+				roomNumber = currSec['ROOM'],
 				instructors = [];
 
 			lecArr.forEach((l) => instructors.push(l['INSTRUCTOR-IN-CHARGE /Instructor']));
@@ -207,6 +212,7 @@ for (let i = 0; i < totalCourses.length; i++) {
 				section,
 				time,
 				instructors,
+				roomNumber,
 			};
 		}
 
@@ -340,6 +346,7 @@ for (let i = 0; i < totalCourses.length; i++) {
 				timings,
 				instructors,
 				newSection: newSectionParse(lec.section).isNew,
+				roomNumber: lec.roomNumber,
 			});
 		});
 	}
@@ -355,6 +362,7 @@ for (let i = 0; i < totalCourses.length; i++) {
 				timings,
 				instructors,
 				newSection: newSectionParse(tut.section).isNew,
+				roomNumber: tut.roomNumber,
 			});
 		});
 	}
@@ -371,6 +379,7 @@ for (let i = 0; i < totalCourses.length; i++) {
 				timings,
 				instructors,
 				newSection: newSectionParse(lab.section).isNew,
+				roomNumber: lab.roomNumber,
 			});
 		});
 	}

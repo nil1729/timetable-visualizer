@@ -528,6 +528,7 @@ export default {
 				let endEvent = `${date.toISOString().substr(0, 10)} ${modifiedEndTime}`;
 				let instructorsList = ``;
 				currSlot.instructors.forEach((it) => (instructorsList += `<li>${it}</li>`));
+				console.log(currSlot);
 				let evData = {
 					start: startEvent,
 					end: endEvent,
@@ -535,9 +536,12 @@ export default {
 					name: `${course.courseCode} - ${currSlot.section}`,
 					title: `${course.courseName}`,
 					courseID: course.courseCode,
-					manualTimeSummary: `${s.split(':')[0]} - ${e}`,
+					manualTimeSummary: `${s} - ${e} ${
+						currSlot.roomNumber ? '(' + currSlot.roomNumber + ')' : ''
+					}`,
 					details: `
 						<div class='black--text'>
+							${currSlot.roomNumber ? '<h4>Room Number:  ' + currSlot.roomNumber + '</h4>' : ''}
 							<h4>${this.typesMapper[type]} Section - ${currSlot.section}</h4>
 							<h4>Instructor(s)</h4>
 							<ul>

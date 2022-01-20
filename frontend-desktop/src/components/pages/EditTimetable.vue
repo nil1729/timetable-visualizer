@@ -462,6 +462,7 @@ export default {
 					courseID: course.courseCode,
 					details: `
 					<div class='black--text'>
+						${currSlot.roomNumber ? '<h4>Room Number:  ' + currSlot.roomNumber + '</h4>' : ''}
 						<h4>Course Code:  ${course.courseCode}</h4>
 						<h4>${this.typesMapper[type]} Section - ${currSlot.section}</h4>
 						<h4>Section Instructor(s)</h4>

@@ -16,6 +16,7 @@ const timetableSchema = new mongoose.Schema({
 					},
 				],
 				instructors: { type: Array },
+				roomNumber: { type: String },
 			},
 			tutorialsSection: {
 				section: { type: String },
@@ -28,6 +29,7 @@ const timetableSchema = new mongoose.Schema({
 					},
 				],
 				instructors: { type: Array },
+				roomNumber: { type: String },
 			},
 			labsSection: {
 				section: { type: String },
@@ -40,6 +42,7 @@ const timetableSchema = new mongoose.Schema({
 					},
 				],
 				instructors: { type: Array },
+				roomNumber: { type: String },
 			},
 		},
 	],

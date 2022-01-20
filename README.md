@@ -19,7 +19,7 @@
 
   - Add to Calendar Feature by importing `.ics` file (Developed by [Shaurya](https://github.com/spidy102))
   - Sending email with `.ics` file as an attachment.
-  - Course Title View on Calendar UI
+  - Course Title View and Room Number on Calendar UI
 
 - **2022-01-14**
 
