@@ -1,0 +1,33 @@
+name: Build & Deploy
+
+on:
+  push:
+    branches: [master]
+
+jobs:
+  build:
+    name: Building Image
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Login to Container Registry
+        run: docker login ${{ secrets.CONTAINER_REGISTRY }} -u ${{ secrets.REGISTRY_USERNAME }} -p ${{ secrets.REGISTRY_PASSWORD }}
+
+      - name: Build the latest Docker image
+        run: docker build  --tag ${{ secrets.IMAGE_NAME }} .
+
+      - name: Push the latest Docker image
+        run: docker push ${{ secrets.IMAGE_NAME }}
+
+  deploy:
+    name: Deploying Image
+    runs-on: ubuntu-latest
+    needs: [build]
+    steps:
+      - name: Deploying application to remote host
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USERNAME }}
+          password: ${{ secrets.SERVER_PASSWORD }}
+          script: bash sync.sh ${{ secrets.APPLICATION_NAME }}

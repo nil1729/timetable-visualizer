@@ -6,3 +6,4 @@ feedback.txt
 tmp
 mail-log.json
 .DS_Store
+.vscode
