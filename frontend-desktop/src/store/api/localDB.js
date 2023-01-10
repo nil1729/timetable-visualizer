@@ -1,7 +1,7 @@
-import { openDB } from 'idb';
-const DB_VERSION = 7;
-const DB_NAME = 'TIMETABLE_BITS_PILANI_VERSION_' + DB_VERSION;
-const DB_STORES = ['USER_COURSES', 'SCHEDULED_COURSES'];
+import { openDB } from "idb";
+const DB_VERSION = 8;
+const DB_NAME = "TIMETABLE_BITS_PILANI_VERSION_" + DB_VERSION;
+const DB_STORES = ["USER_COURSES", "SCHEDULED_COURSES"];
 
 export default {
   async getDB() {
@@ -10,18 +10,18 @@ export default {
         DB_STORES.forEach((store) => {
           if (!db.objectStoreNames.contains(store)) {
             db.createObjectStore(store, {
-              keyPath: 'courseCode',
-              autoIncrement: true,
+              keyPath: "courseCode",
+              autoIncrement: true
             });
           }
         });
-      },
+      }
     });
   },
 
   async writeData(storeName, data) {
     const db = await this.getDB();
-    const tx = db.transaction(storeName, 'readwrite');
+    const tx = db.transaction(storeName, "readwrite");
     const store = tx.objectStore(storeName);
     store.put(data);
     return tx.done;
@@ -29,7 +29,7 @@ export default {
 
   async writeBulkData(storeName, dataArray) {
     const db = await this.getDB();
-    const tx = db.transaction(storeName, 'readwrite');
+    const tx = db.transaction(storeName, "readwrite");
     const store = tx.objectStore(storeName);
     let promises = [];
     dataArray.forEach((data) => promises.push(store.put(data)));
@@ -39,13 +39,13 @@ export default {
 
   async readData(storeName) {
     const db = await this.getDB();
-    const store = db.transaction(storeName, 'readonly').objectStore(storeName);
+    const store = db.transaction(storeName, "readonly").objectStore(storeName);
     return store.getAll();
   },
 
   async removeItemFromStore(storeName, key) {
     const db = await this.getDB();
-    const tx = db.transaction(storeName, 'readwrite');
+    const tx = db.transaction(storeName, "readwrite");
     const store = tx.objectStore(storeName);
     store.delete(key);
     return tx.done;
@@ -58,5 +58,5 @@ export default {
         window.indexedDB.deleteDatabase(db.name);
       }
     });
-  },
+  }
 };
