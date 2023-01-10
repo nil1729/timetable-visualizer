@@ -5,8 +5,8 @@ const path = require("path");
 // const scheduledCourses = require("./data.json").scheduledCourses[0];
 
 const generateICS = (scheduledCourses, filename) => {
-  const semStart = new Date(2022, 0, 17);
-  const semEnd = new Date(2022, 4, 10);
+  const semStart = new Date(2023, 0, 17);
+  const semEnd = new Date(2023, 4, 5);
   let strResult = "";
 
   const courseMap = new Map();
