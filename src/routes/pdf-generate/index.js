@@ -11,6 +11,7 @@ router.post("/generate-timetable", async (req, res) => {
   try {
     let timetableArray = generateParsedArrayForPDF(generateTimetableAPI(req.body));
     const browser = await puppeteer.launch({
+      executablePath: "/usr/bin/chromium-browser",
       headless: true,
       args: ["--no-sandbox"]
     });
