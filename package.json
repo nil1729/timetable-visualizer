@@ -31,7 +31,7 @@
   },
   "dependencies": {
     "@sendgrid/mail": "^7.6.0",
-    "ejs": "^3.1.6",
+    "ejs": "^5.0.0",
     "express": "^4.17.1",
     "jshint": "^2.13.3",
     "lodash": "^4.17.21",
