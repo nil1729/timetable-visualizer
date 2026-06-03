@@ -22,7 +22,9 @@ const { ObjectId } = require('mongodb');
 router.get('/', async (req, res) => {
 	try {
 		const { limit, page, sort, order, search } = req.query;
-		const regexTester = new RegExp('' || search, 'gi');
+		// Sanitize search input to prevent ReDoS via catastrophic backtracking
+		const safeSearch = search ? search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').slice(0, 50) : '';
+		const regexTester = new RegExp(safeSearch || '', 'gi');
 
 		let queryArr = [
 			{
@@ -100,6 +102,7 @@ router.get('/', async (req, res) => {
 		return res.status(200).json(output[0]);
 	} catch (error) {
 		console.log(error);
+		return res.status(500).json({ error: 'Internal server error' });
 	}
 });
 
@@ -132,10 +135,11 @@ router.get('/:course_code', async (req, res) => {
 
 		let output = await Course.aggregate(queryArr);
 
-		if (output.length === 0) throw new Error('No courses found with given ID');
+		if (output.length === 0) return res.status(404).json({ error: 'No courses found with given course code' });
 		return res.status(200).json(output[0]);
 	} catch (error) {
 		console.log(error);
+		return res.status(500).json({ error: 'Internal server error' });
 	}
 });
 
@@ -166,6 +170,7 @@ router.get('/generate/course_details', async (req, res) => {
 		return res.status(200).json(output);
 	} catch (error) {
 		console.log(error);
+		return res.status(500).json({ error: 'Internal server error' });
 	}
 });
 

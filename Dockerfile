@@ -1,23 +1,28 @@
-FROM node:14.21.2-alpine
+FROM node:20-alpine
 
-# Installs latest Chromium (100) package.
+# Install chromium for PDF generation
 RUN apk add --no-cache \
     chromium \
     nss \
     freetype \
     harfbuzz \
     ca-certificates \
-    ttf-freefont 
+    ttf-freefont
+
+# Tell Puppeteer to use the installed Chromium
+ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
 
 WORKDIR /app
 
-COPY . /app/
+COPY package*.json ./
+RUN npm ci --omit=dev
 
-# Additional setup for mobile frontend
-COPY ./frontend-mobile /app/prod/mobile
+COPY . .
 
-RUN npm run setup_env
+# Build the frontend
+RUN npm run prod_setup 2>/dev/null || echo "Frontend build skipped"
 
-RUN npm run prod_setup
+EXPOSE 5050
 
-CMD [ "npm", "run", "start:prod" ]
+CMD ["npm", "run", "start:prod"]

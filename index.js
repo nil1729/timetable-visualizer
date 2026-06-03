@@ -1,7 +1,6 @@
-const path = require('path');
-const configFilePath = path.join('/opt/nil1729/timetable-visualizer/backend.env');
-require('dotenv').config({ path: configFilePath });
+require('dotenv').config();
 
+const path = require('path');
 const express = require('express');
 const DeviceDetector = require('node-device-detector');
 const DeviceHelper = require('node-device-detector/helper');
@@ -10,6 +9,7 @@ const PORT = process.env.PORT || 5050;
 const connectDB = require('./config/db');
 const courseRoutes = require('./src/routes/courses');
 const timetableRoutes = require('./src/routes/timetable');
+const adminRoutes = require('./src/routes/admin');
 const morgan = require('morgan');
 
 // create middleware
@@ -26,18 +26,30 @@ const middlewareDetect = (req, res, next) => {
 
 app.use(express.json());
 app.use(morgan('combined'));
+
+// API routes
 app.use('/api/v1/courses', courseRoutes);
 app.use('/api/v1/timetable', timetableRoutes);
 app.use('/api/v1/feedback', require('./src/routes/feedback'));
-app.use('/api/v1/pdf', require('./src/routes/pdf-generate'));
+app.use('/api/v1/pdf', require('./src/routes/pdf-generate/index'));
+app.use('/api/v1/admin', adminRoutes);
 
-app.use(express.static(__dirname + '/prod'));
+// Admin panel
+app.use('/admin/settings', adminRoutes);
+
+// Health check
+app.get('/health', (req, res) => {
+  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
+// Static files
+app.use(express.static(path.join(__dirname, 'prod')));
 if (process.env.NODE_ENV === 'production') {
   app.get('*', middlewareDetect, async (req, res) => {
     if (DeviceHelper.isDesktop(req.deviceInfo)) {
-      res.sendFile(__dirname + '/prod/desktop/index.html');
+      res.sendFile(path.join(__dirname, 'prod', 'desktop', 'index.html'));
     } else {
-      res.sendFile(__dirname + '/frontend-mobile/index.html');
+      res.sendFile(path.join(__dirname, 'frontend-mobile', 'index.html'));
     }
   });
 }
@@ -45,4 +57,5 @@ if (process.env.NODE_ENV === 'production') {
 app.listen(PORT, async () => {
   await connectDB();
   console.log(`Server started on port ${PORT}`);
+  console.log(`Admin panel: http://localhost:${PORT}/admin/settings`);
 });

@@ -135,6 +135,7 @@ router.post('/generate-timetable', async (req, res, next) => {
 		return res.json(result);
 	} catch (e) {
 		console.log(e);
+		return res.status(500).json({ error: 'Failed to generate timetable' });
 	}
 });
 
@@ -201,14 +202,15 @@ router.post('/generate/ics-file', async (req, res, next) => {
 				message: 'Email sent successfully',
 			});
 		} else {
-			const icsBuffer = fs.readFileSync(`tmp/${fileName}.ics`);
+			const icsFilePath = path.join(__dirname, '../../tmp', `${fileName}.ics`);
+			const icsBuffer = fs.readFileSync(icsFilePath);
 			res.set('Content-Type', 'text/calendar');
 			res.send(icsBuffer);
 		}
-		fs.unlinkSync(`tmp/${fileName}.ics`);
+		fs.unlinkSync(path.join(__dirname, '../../tmp', `${fileName}.ics`));
 		return;
 	} catch (e) {
-		return res.status(400).json({ error: error.message });
+		return res.status(400).json({ error: e.message });
 	}
 });
 

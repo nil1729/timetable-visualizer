@@ -1,11 +1,12 @@
 {
   "name": "timetable-visualizer",
-  "version": "1.0.0",
-  "description": "BITS Timetable Visualizer API",
+  "version": "2.0.0",
+  "description": "BITS Timetable Companion — Search, Schedule, Share, and Export to Calendar. Zero-CLI configuration via web admin panel.",
   "main": "index.js",
   "scripts": {
     "setup_env": "npm install && npm install --prefix frontend-desktop",
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "parse-timetable": "node timetable-parser/index.js",
     "start": "node .",
     "server": "NODE_ENV=development nodemon . --config nodemon.json",
@@ -18,16 +19,20 @@
   },
   "keywords": [
     "bits-pilani",
-    "nil1729",
-    "timetable"
+    "timetable",
+    "calendar",
+    "schedule",
+    "vue",
+    "express"
   ],
-  "author": "Nilanjan Deb, Shaurya",
+  "author": "Nilanjan Deb, Shaurya, Azizim3",
   "license": "MIT",
   "devDependencies": {
     "concurrently": "^7.6.0",
     "dotenv": "^10.0.0",
     "morgan": "^1.10.0",
-    "nodemon": "^2.0.12"
+    "nodemon": "^2.0.12",
+    "vitest": "^1.0.0"
   },
   "dependencies": {
     "@sendgrid/mail": "^7.6.0",
